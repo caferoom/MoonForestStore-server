@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request, Get } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  InternalServerErrorException,
+  Get,
+} from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "@nestjs/passport";
 
@@ -12,25 +19,35 @@ export class AuthController {
     const body = req.body;
 
     // 检索数据库拿到用户信息
-    // TODO
-    const userInfo = {
-      userId: 1,
-      username: body.username,
-      password: body.password,
-    };
+    const user = await this.authService.validateUser(body.username, body.password);
+
+    if (!user) {
+      // 应该在守卫中已验证通过
+      throw new InternalServerErrorException();
+    }
 
     // 更新数据库中登录信息
-    // TODO
-    // update last login time、last login id
+    await this.authService.updateLoginTime(user.id);
+    await this.authService.updateLoginIP(user.id, req);
 
     // 生成jwt
-    const jwt = await this.authService.login(userInfo);
+    const jwt = await this.authService.login({
+      username: user.username,
+      password: user.password,
+    });
+
     return {
-      userInfo,
+      userInfo: {
+        username: user.username,
+        password: user.password,
+      },
       token: jwt.access_token,
     };
   }
 
+  @UseGuards(AuthGuard("jwt"))
   @Get("checkLogin")
-  async checkLogin() {}
+  async checkLogin() {
+    return false;
+  }
 }

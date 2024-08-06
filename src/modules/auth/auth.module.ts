@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
-import { UsersModule } from "../users/users.module";
+import { AdminModule } from "../admin/admin.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./strategies/jwt.strategy";
@@ -10,7 +10,7 @@ import { LocalStrategy } from "./guards/local.strategy";
 
 @Module({
   imports: [
-    UsersModule,
+    AdminModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule], // 导入 ConfigModule 以使用环境变量

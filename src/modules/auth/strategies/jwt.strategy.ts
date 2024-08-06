@@ -17,7 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     // 在这里你可以提供一个自定义的验证逻辑
     // 例如从数据库中查找用户并返回用户对象
     // 这里只是返回 payload 作为示例
-    console.log("payload", payload);
     return { userId: payload.sub, username: payload.username };
   }
 }

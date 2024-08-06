@@ -1,40 +1,25 @@
 import { Injectable } from "@nestjs/common";
-
-// 这里我们使用一个简单的内存数据存储,实际应用中你应该使用数据库或其他持久化存储
-const users = [
-  {
-    userId: 1,
-    username: "john",
-    nickname: "john1",
-    password: "changeme",
-    last_login_time: Date.now(),
-    last_login_ip: "101.1.1.1",
-    register_time: Date.now(),
-  },
-  {
-    userId: 2,
-    username: "maria",
-    password: "guess",
-    last_login_time: Date.now(),
-    last_login_ip: "101.1.1.1",
-    register_time: Date.now(),
-  },
-];
+import { InjectRepository } from "@nestjs/typeorm";
+import { User } from "src/database/user.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class UsersService {
-  async exist(username: string): Promise<any> {
-    return users.find((user) => user.username === username);
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
+
+  async exist(username: string): Promise<boolean> {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    return !!user;
   }
 
-  async validPassword(username: string, password: string): Promise<any> {
-    const user = users.find((user) => user.username === username);
-    if (user && user.password === password) {
-      return {
-        username,
-        password,
-      };
-    }
-    return null;
+  findOneById(id: number): Promise<User | null> {
+    return this.usersRepository.findOneBy({ id });
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
   }
 }
