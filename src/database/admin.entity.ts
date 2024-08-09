@@ -1,3 +1,4 @@
+import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -5,21 +6,29 @@ export class Admin {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 25 })
+  @Column({ type: "varchar", length: 25 })
   username: string;
 
-  @Column({ length: 255 })
+  @Column({ type: "varchar", length: 255 })
   password: string;
 
-  @Column({ length: 255 })
+  @Column({ type: "varchar", length: 255 })
   password_salt: string;
 
-  @Column({ length: 60 })
+  @Column({ type: "varchar", length: 60 })
   last_login_ip: string;
 
-  @Column({ type: "bigint" })
+  @Column({ type: "int", default: 0 })
   last_login_time: number;
 
-  @Column({ default: false })
+  @Column({ type: "tinyint", width: 1, default: 0, nullable: true })
   is_delete: boolean;
 }
+
+export type IAdminCreateMembers = TypeCreateMembers<
+  Admin,
+  "last_login_ip" | "last_login_time" | "is_delete",
+  "id"
+>;
+
+export type IAdminUpdateMembers = TypeUpdateMembers<Admin, "id">;

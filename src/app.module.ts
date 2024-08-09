@@ -5,6 +5,9 @@ import { UsersModule } from "./modules/users/users.module";
 import { OverviewModule } from "./modules/overview/overview.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AdminModule } from "./modules/admin/admin.module";
+import { StoreModule } from "./modules/store/store.module";
+import { ShipperModule } from "./modules/shipper/shipper.module";
+import { CommonModule } from "./modules/common/common.module";
 
 @Module({
   imports: [
@@ -15,6 +18,9 @@ import { AdminModule } from "./modules/admin/admin.module";
     AuthModule,
     UsersModule,
     AdminModule,
+    StoreModule,
+    CommonModule,
+    ShipperModule,
     OverviewModule,
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
@@ -25,6 +31,8 @@ import { AdminModule } from "./modules/admin/admin.module";
         password: configService.get<string>("DATABASE_PASSWORD"),
         database: configService.get<string>("DATABASE_NAME"),
         connectorPackage: "mysql2",
+        charset: "utf8mb4", // 设置字符集
+        collation: "utf8mb4_unicode_ci", // 设置排序规则
         ssl: false,
         synchronize: true,
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
