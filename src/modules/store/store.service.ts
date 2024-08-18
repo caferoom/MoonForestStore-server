@@ -4,7 +4,7 @@ import {
   ShowSettings,
   IShowSettingsCreateMembers,
   IShowSettingsUpdateMembers,
-} from "src/database/showSettings.entity";
+} from "src/database/show_settings.entity";
 import { FindOptionsWhere, Repository } from "typeorm";
 
 @Injectable()

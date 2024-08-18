@@ -1,5 +1,14 @@
 import { InternalServerErrorException } from "@nestjs/common";
-import { DeepPartial, FindOptionsWhere, Repository } from "typeorm";
+import {
+  DeepPartial,
+  DeleteResult,
+  FindManyOptions,
+  FindOptionsWhere,
+  ObjectId,
+  QueryRunner,
+  Repository,
+} from "typeorm";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepPartial<T>> {
   protected constructor(protected readonly repository: Repository<T>) {}
@@ -20,15 +29,39 @@ export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepP
       }
     }
 
-    this.repository.save(one);
+    return this.repository.save(one);
+  }
+
+  async update(
+    criteria:
+      | string
+      | number
+      | string[]
+      | Date
+      | ObjectId
+      | FindOptionsWhere<T>
+      | number[]
+      | Date[]
+      | ObjectId[],
+    partialEntity: QueryDeepPartialEntity<T>,
+  ) {
+    return this.repository.update(criteria, partialEntity);
+  }
+
+  async findAndCount(options?: FindManyOptions<T>) {
+    return this.repository.findAndCount(options);
   }
 
   async add(entity: CI) {
-    this.repository.save(this.repository.create(entity));
+    return this.repository.save(this.repository.create(entity));
   }
 
-  async remove(id: number): Promise<void> {
-    await this.repository.delete(id);
+  async remove(id: number): Promise<DeleteResult> {
+    return this.repository.delete(id);
+  }
+
+  async findBy(where: FindOptionsWhere<T> | FindOptionsWhere<T>[]): Promise<T[]> {
+    return this.repository.findBy(where);
   }
 
   async findOneById(id: number): Promise<T | null> {
@@ -37,5 +70,9 @@ export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepP
 
   async find(where: FindOptionsWhere<T>[] | FindOptionsWhere<T>): Promise<T[] | null> {
     return this.repository.find({ where });
+  }
+
+  async createQueryBuilder(alias?: string, queryRunner?: QueryRunner) {
+    return this.repository.createQueryBuilder(alias, queryRunner);
   }
 }

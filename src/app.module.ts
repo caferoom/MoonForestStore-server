@@ -8,6 +8,9 @@ import { AdminModule } from "./modules/admin/admin.module";
 import { StoreModule } from "./modules/store/store.module";
 import { ShipperModule } from "./modules/shipper/shipper.module";
 import { CommonModule } from "./modules/common/common.module";
+import { FreightModule } from "./modules/freight/freight.module";
+import { NoticeModule } from "./modules/notice/notice.module";
+import { AdModule } from "./modules/ad/ad.module";
 
 @Module({
   imports: [
@@ -18,8 +21,11 @@ import { CommonModule } from "./modules/common/common.module";
     AuthModule,
     UsersModule,
     AdminModule,
+    AdModule,
     StoreModule,
+    FreightModule,
     CommonModule,
+    NoticeModule,
     ShipperModule,
     OverviewModule,
     TypeOrmModule.forRootAsync({

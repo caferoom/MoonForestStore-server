@@ -5,7 +5,7 @@ import {
   ISettingsCreateMembers,
   ISettingsUpdateMembers,
 } from "src/database/settings.entity";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { DeleteResult, FindOptionsWhere, Repository } from "typeorm";
 
 @Injectable()
 export class SettingsService {
@@ -37,8 +37,8 @@ export class SettingsService {
     this.settingsRepository.save(this.settingsRepository.create(settings));
   }
 
-  async remove(id: number): Promise<void> {
-    await this.settingsRepository.delete(id);
+  async remove(id: number): Promise<DeleteResult> {
+    return await this.settingsRepository.delete(id);
   }
 
   async findOneById(id: number): Promise<Settings | null> {

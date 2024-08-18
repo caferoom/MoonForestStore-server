@@ -46,6 +46,20 @@ export class ShipperController {
     return true;
   }
 
+  // 删除候选快递公司信息
+  @Post("destory")
+  async destory(@Request() req) {
+    const { id } = req.body;
+    return await this.shipperService.remove(Number(id));
+  }
+
+  @Get("enabledStatus")
+  async enabledStatus(@Request() req) {
+    const { id, status } = req.query;
+    this.shipperService.edit(Number(id), { enabled: Boolean(status) });
+    return true;
+  }
+
   @Get("info")
   async info(@Request() req) {
     const { id } = req.query;
@@ -82,5 +96,10 @@ export class ShipperController {
       count: data[1],
       currentPage: page,
     };
+  }
+  @Post("updateSort")
+  async updateSort(@Request() req) {
+    const { id, sort } = req.body;
+    return await this.shipperService.edit(id, { sort_order: sort });
   }
 }

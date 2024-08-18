@@ -17,10 +17,10 @@ export class Shipper {
   sort_order: number;
 
   @Column({ type: "varchar", length: 100, nullable: true, default: null })
-  monthCode: string;
+  MonthCode: string;
 
   @Column({ type: "varchar", length: 100, nullable: true, default: null })
-  customerName: string;
+  CustomerName: string;
 
   @Column({ type: "tinyint", width: 1, default: 0 })
   enabled: boolean;
@@ -28,7 +28,7 @@ export class Shipper {
 
 export type IShipperCreateMembers = TypeCreateMembers<
   Shipper,
-  "enabled" | "sort_order" | "monthCode" | "customerName",
+  "enabled" | "sort_order" | "MonthCode" | "CustomerName",
   "id"
 >;
 

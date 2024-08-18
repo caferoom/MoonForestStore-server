@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IShipperCreateMembers, IShipperUpdateMembers, Shipper } from "src/database/shipper.entity";
-import { FindOptionsWhere, QueryRunner, Repository } from "typeorm";
+import { DeleteResult, FindOptionsWhere, QueryRunner, Repository } from "typeorm";
 
 @Injectable()
 export class ShipperService {
@@ -33,8 +33,8 @@ export class ShipperService {
     return this.shipperRepository.save(this.shipperRepository.create(shipper));
   }
 
-  async remove(id: number): Promise<void> {
-    await this.shipperRepository.delete(id);
+  async remove(id: number): Promise<DeleteResult> {
+    return await this.shipperRepository.delete(id);
   }
 
   async findOneById(id: number): Promise<Shipper | null> {
