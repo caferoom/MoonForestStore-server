@@ -1,50 +1,18 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
 import { Admin, IAdminCreateMembers, IAdminUpdateMembers } from "src/database/admin.entity";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import * as crypto from "crypto-js";
+import { BaseService } from "src/common/base.service";
 
 @Injectable()
-export class AdminService {
+export class AdminService extends BaseService<Admin, IAdminCreateMembers, IAdminUpdateMembers> {
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
-  ) {}
-
-  async edit(id: number, admin: IAdminUpdateMembers) {
-    if (typeof id !== "number") {
-      throw new InternalServerErrorException("未传递id");
-    }
-    const one = await this.findOneById(id);
-    if (!one) {
-      throw new InternalServerErrorException("不存在对应Id的admin");
-    }
-
-    // 遍历 admin 的属性并将值赋给 one
-    for (const key of Object.keys(admin)) {
-      if (admin[key] !== undefined) {
-        one[key] = admin[key];
-      }
-    }
-
-    this.adminRepository.save(one);
-  }
-
-  async add(admin: IAdminCreateMembers) {
-    this.adminRepository.save(this.adminRepository.create(admin));
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.adminRepository.delete(id);
-  }
-
-  async findOneById(id: number): Promise<Admin | null> {
-    return this.adminRepository.findOneBy({ id });
-  }
-
-  async find(where: FindOptionsWhere<Admin>[] | FindOptionsWhere<Admin>): Promise<Admin[] | null> {
-    return this.adminRepository.find({ where });
+  ) {
+    super(adminRepository);
   }
 
   async validPassword(username: string, password: string): Promise<Admin | null> {

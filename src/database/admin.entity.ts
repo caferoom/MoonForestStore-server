@@ -25,10 +25,6 @@ export class Admin {
   is_delete: boolean;
 }
 
-export type IAdminCreateMembers = TypeCreateMembers<
-  Admin,
-  "last_login_ip" | "last_login_time" | "is_delete",
-  "id"
->;
+export type IAdminCreateMembers = TypeCreateMembers<Admin, "last_login_time" | "is_delete", "id">;
 
 export type IAdminUpdateMembers = TypeUpdateMembers<Admin, "id">;

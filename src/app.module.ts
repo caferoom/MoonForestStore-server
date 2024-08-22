@@ -41,6 +41,7 @@ import { AdModule } from "./modules/ad/ad.module";
         collation: "utf8mb4_unicode_ci", // 设置排序规则
         ssl: false,
         synchronize: true,
+        engine: "InnoDB",
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
       }),
       inject: [ConfigService],
