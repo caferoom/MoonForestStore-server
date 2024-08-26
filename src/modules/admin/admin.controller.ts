@@ -25,6 +25,7 @@ export class AdminController {
       username: username,
       password_salt: "HIOLABS",
       password: "",
+      last_login_ip: req.id,
     };
 
     admin.password = crypto.MD5(password + "" + admin.password_salt).toString();
@@ -34,7 +35,7 @@ export class AdminController {
 
   @Get()
   async index() {
-    const data: Admin[] | null = await this.adminService.find({ is_delete: false });
+    const data: Admin[] | null = await this.adminService.find({ where: { is_delete: false } });
     if (data) {
       const clone = cloneDeep(data);
       for (const item of clone) {
@@ -77,7 +78,7 @@ export class AdminController {
     const { user, change } = req.body;
 
     const obj = Object.assign({}, user);
-    const ex = await this.adminService.find({ username: user.username });
+    const ex = await this.adminService.find({ where: { username: user.username } });
     const filted = ex.filter((e) => e.id !== user.id);
     const self = ex.filter((e) => e.id === user.id)[0];
 

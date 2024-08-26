@@ -65,4 +65,4 @@ export type ICategoryCreateMembers = TypeCreateMembers<
   "id"
 >;
 
-export type CategoryUpdateMembers = TypeUpdateMembers<Category, "id">;
+export type ICategoryUpdateMembers = TypeUpdateMembers<Category, "id">;

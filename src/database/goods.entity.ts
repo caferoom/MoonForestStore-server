@@ -1,11 +1,13 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
-import { Column, Entity, PrimaryGeneratedColumn, Index } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Index, OneToMany } from "typeorm";
+import { FootPrint } from "./footprint.entity";
 
 @Entity("goods")
 @Index(["category_id"])
 @Index(["goods_number"])
 @Index(["sort_order"])
 export class Goods {
+  @OneToMany(() => FootPrint, (footprint) => footprint.goods_id)
   @PrimaryGeneratedColumn({ type: "int", unsigned: true })
   id: number;
 

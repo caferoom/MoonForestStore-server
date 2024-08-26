@@ -11,7 +11,7 @@ export class NoticeController {
 
   @Get("")
   async indexAction() {
-    const d = await this.noticeService.find({});
+    const d = await this.noticeService.find();
     const data = cloneDeep(d);
     for (const item of data) {
       (item as any).end_time = dayjs(item.end_time * 1000).format("YYYY-MM-DD HH:mm:ss");

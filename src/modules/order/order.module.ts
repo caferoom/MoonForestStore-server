@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
-import { orderService } from "./order.service";
 import { orderController } from "./order.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
+import { OrderService } from "./order.service";
 
 @Module({
-  providers: [orderService, JwtStrategy],
+  providers: [OrderService, JwtStrategy],
   controllers: [orderController],
-  exports: [orderService],
+  exports: [OrderService],
 })
 export class orderModule {}

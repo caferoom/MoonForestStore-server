@@ -15,7 +15,9 @@ export class ShipperController {
   @Get("usingDeliveryCompanyList")
   async shipper() {
     const infoArray = await this.shipperService.find({
-      enabled: true,
+      where: {
+        enabled: true,
+      },
     });
     return infoArray;
   }
@@ -24,7 +26,9 @@ export class ShipperController {
   @Get("getShippingAddress")
   async getShippingAddress() {
     const settingsArray = await this.settingsService.find({
-      id: 1,
+      where: {
+        id: 1,
+      },
     });
     return settingsArray[0];
   }

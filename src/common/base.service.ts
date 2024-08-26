@@ -3,6 +3,7 @@ import {
   DeepPartial,
   DeleteResult,
   FindManyOptions,
+  FindOneOptions,
   FindOptionsWhere,
   ObjectId,
   QueryRunner,
@@ -64,12 +65,16 @@ export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepP
     return this.repository.findBy(where);
   }
 
+  async findOne(options: FindOneOptions<T>) {
+    return this.repository.findOne(options);
+  }
+
   async findOneById(id: number): Promise<T | null> {
     return this.repository.findOneBy({ id } as any);
   }
 
-  async find(where: FindOptionsWhere<T>[] | FindOptionsWhere<T>): Promise<T[] | null> {
-    return this.repository.find({ where });
+  async find(options?: FindManyOptions<T>): Promise<T[] | null> {
+    return this.repository.find(options);
   }
 
   async createQueryBuilder(alias?: string, queryRunner?: QueryRunner) {

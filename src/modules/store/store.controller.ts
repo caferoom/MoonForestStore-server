@@ -9,7 +9,7 @@ export class StoreController {
 
   @Get("showset")
   async showset() {
-    const models = await this.storeService.find({});
+    const models = await this.storeService.find();
     return models[0];
   }
 

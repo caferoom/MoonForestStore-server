@@ -69,8 +69,10 @@ export class AdController {
 
     if (id > 0) {
       const ex = await this.adService.find({
-        goods_id: values.goods_id,
-        is_delete: false,
+        where: {
+          goods_id: values.goods_id,
+          is_delete: false,
+        },
       });
       if (!(ex && ex.length !== 0)) {
         await this.adService.update({ id: id }, values);
@@ -82,8 +84,10 @@ export class AdController {
       }
     } else {
       const ex = await this.adService.find({
-        goods_id: values.goods_id,
-        is_delete: false,
+        where: {
+          goods_id: values.goods_id,
+          is_delete: false,
+        },
       });
       if (!(ex && ex.length !== 0)) {
         delete values.id;
@@ -104,9 +108,10 @@ export class AdController {
   }
 
   @Post("getallrelate")
-  async getallrelateAction(@Request() req) {
-    const { id } = req.body;
-    const data = await this.goodsService.find({ is_on_sale: 1, is_delete: false });
+  async getallrelateAction() {
+    const data = await this.goodsService.find({
+      where: { is_on_sale: 1, is_delete: false },
+    });
 
     return data.map((d) => {
       return {

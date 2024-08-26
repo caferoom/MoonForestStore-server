@@ -1,14 +1,18 @@
-import { Controller, Get, UseGuards, Request } from "@nestjs/common";
+import { Controller, Get, UseGuards, Request, Post } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { UsersService } from "./users.service";
 import * as dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
 import { BusinessException } from "src/common/exceptions/business.exception";
-import { CartService } from "./cart.service";
-import { OrderService } from "./order.service";
-import { LessThan } from "typeorm";
+import { CartService } from "../cart/cart.service";
+import { ILike, LessThan } from "typeorm";
 import { OrderGoodsService } from "./order_goods.service";
+import { RegionService } from "../common/region.service";
+import { OrderService } from "../order/order.service";
+import { AddressService } from "../address/address.service";
+import * as Express from "express";
+import { FootprintService } from "../footprint/footprint.service";
 
 @Controller("user")
 @UseGuards(AuthGuard("jwt"))
@@ -18,6 +22,9 @@ export class UsersController {
     private cartService: CartService,
     private orderService: OrderService,
     private orderGoodsService: OrderGoodsService,
+    private regionService: RegionService,
+    private addressService: AddressService,
+    private footPrintService: FootprintService,
   ) {}
 
   @Get("")
@@ -138,10 +145,10 @@ export class UsersController {
     const data = cloneDeep(_data);
 
     for (const item of data) {
-      (item as any).goodsList = this.orderGoodsService.find({
+      (item as any).goodsList = await this.orderGoodsService.find({
         where: {
-          orderId: item.id,
-          is_delete: 0,
+          order_id: item.id,
+          is_delete: false,
         },
         select: [
           "goods_name",
@@ -151,39 +158,240 @@ export class UsersController {
           "retail_price",
         ],
       });
-
-      await this.model("order_goods")
-        .field("goods_name,list_pic_url,number,goods_specifition_name_value,retail_price")
-        .where({
-          order_id: item.id,
-          is_delete: 0,
-        })
-        .select();
-      item.goodsCount = 0;
-      item.goodsList.forEach((v) => {
-        item.goodsCount += v.number;
+      (item as any).goodsCount = 0;
+      (item as any).goodsList.forEach((v) => {
+        (item as any).goodsCount += v.number;
       });
-      const province_name = await this.model("region")
-        .where({
-          id: item.province,
-        })
-        .getField("name", true);
-      const city_name = await this.model("region")
-        .where({
-          id: item.city,
-        })
-        .getField("name", true);
-      const district_name = await this.model("region")
-        .where({
-          id: item.district,
-        })
-        .getField("name", true);
-      item.full_region = province_name + city_name + district_name;
+
+      const province_name = await this.regionService.find({
+        where: {
+          id: Number(item.province),
+        },
+        select: ["name"],
+      });
+      const city_name = await this.regionService.find({
+        where: {
+          id: Number(item.city),
+        },
+        select: ["name"],
+      });
+      const district_name = await this.regionService.find({
+        where: {
+          id: Number(item.district),
+        },
+        select: ["name"],
+      });
+
+      (item as any).full_region = province_name[0].name + city_name[0].name + district_name[0].name;
       item.postscript = Buffer.from(item.postscript, "base64").toString();
-      item.add_time = moment.unix(item.add_time).format("YYYY-MM-DD HH:mm:ss");
-      item.order_status_text = await this.model("order").getOrderStatusText(item.id);
-      item.button_text = await this.model("order").getOrderBtnText(item.id);
+      (item as any).add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
+      (item as any).order_status_text = await this.orderService.getOrderStatusText(item.id);
+      (item as any).button_text = await this.orderService.getOrderBtnText(item.id);
     }
-    return this.success(data);
+    return {
+      data,
+      currentPage: page,
+      count: count,
+    };
+  }
+
+  @Get("address")
+  async addressAction(@Request() req) {
+    const { id, page = 1, size = 10 } = req.query;
+
+    const [_data, total] = await this.addressService.findAndCount({
+      where: { user_id: id },
+      skip: (page - 1) * size,
+      take: size,
+    });
+    const data = cloneDeep(_data);
+    for (const item of data) {
+      const province_name = await this.regionService.findOne({
+        where: {
+          id: item.province_id,
+        },
+        select: ["name"],
+      });
+      const city_name = await this.regionService.findOne({
+        where: {
+          id: item.city_id,
+        },
+        select: ["name"],
+      });
+
+      const district_name = await this.regionService.findOne({
+        where: {
+          id: item.district_id,
+        },
+        select: ["name"],
+      });
+
+      (item as any).full_region =
+        province_name.name + city_name.name + district_name.name + item.address;
+    }
+    return {
+      data: data,
+      count: total,
+      currentPage: page,
+    };
+  }
+
+  @Post("saveaddress")
+  async saveaddressAction(@Request() req) {
+    const { id, user_id, name, mobile, address, addOptions } = req.body;
+
+    const province = addOptions[0];
+    const city = addOptions[1];
+    const district = addOptions[2];
+    const info = {
+      name: name,
+      mobile: mobile,
+      address: address,
+      province_id: province,
+      district_id: district,
+      city_id: city,
+    };
+    await this.addressService.update(
+      {
+        user_id: user_id,
+        id: id,
+      },
+      info,
+    );
+
+    return true;
+  }
+
+  @Get("cartdata")
+  async cartdataAction(@Request() req) {
+    const { id, page = 1, size = 10 } = req.body;
+
+    const [_data, total] = await this.cartService.findAndCount({
+      where: { user_id: id },
+      order: { add_time: "DESC" },
+      skip: (page - 1) * size,
+      take: size, // 每页数量
+    });
+
+    const data = cloneDeep(_data);
+
+    for (const item of data) {
+      (item as any).add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
+    }
+
+    return {
+      data,
+      count: total,
+      currentPage: page,
+    };
+  }
+
+  @Get("foot")
+  async footAction(@Request() req: Express.Request) {
+    const { id, page = 1, size = 10 } = req.query;
+
+    const _page = Number(page);
+    const _size = Number(size);
+
+    const queryBuilder = await this.footPrintService.createQueryBuilder("f");
+    const [data, total] = await queryBuilder
+      .leftJoinAndSelect("f.goods_id", "g")
+      .where("f.user_id = :userId", { userId: id })
+      .skip((_page - 1) * _size)
+      .take(_size)
+      .getManyAndCount();
+
+    return {
+      data,
+      count: total,
+      currentPage: _page,
+    };
+  }
+
+  @Post("updateInfo")
+  async updateInfoAction(@Request() req: Express.Request) {
+    const { id, nickname } = req.body;
+
+    const buffer = Buffer.from(nickname);
+    const _nickname = buffer.toString("base64");
+    const model = await this.usersService.update(
+      {
+        id: id,
+      },
+      {
+        nickname: _nickname,
+      },
+    );
+    return model;
+  }
+
+  @Post("destory")
+  async destoryAction(@Request() req: Express.Request) {
+    const { id } = req.body;
+    await this.usersService.remove(id);
+    return true;
+  }
+
+  @Post("updateMobile")
+  async updateMobileAction(@Request() req: Express.Request) {
+    const { id, mobile } = req.body;
+
+    await this.usersService.update(
+      {
+        id: id,
+      },
+      {
+        mobile: mobile,
+      },
+    );
+    const data = await this.usersService.findOneById(id);
+
+    return data;
+  }
+
+  @Post("updateName")
+  async updateNameAction(@Request() req: Express.Request) {
+    const { id, name } = req.body;
+
+    await this.usersService.update({ id: id }, { name: name });
+
+    const data = await this.usersService.findOneById(id);
+
+    return data;
+  }
+
+  @Get("shopcart")
+  async indesxAction(@Request() req: Express.Request) {
+    const { page = 1, size = 10, name = "" } = req.query;
+
+    const [_data, total] = await this.cartService.findAndCount({
+      where: {
+        goods_name: ILike(`%${name}%`),
+      },
+      order: {
+        id: "DESC",
+      },
+      skip: (Number(page) - 1) * Number(size),
+      take: Number(size),
+    });
+
+    const data = cloneDeep(_data);
+
+    for (const item of data) {
+      (item as any).add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
+      const userInfo = await this.usersService.findOneById(item.user_id);
+
+      if (userInfo) {
+        (item as any).nickname = Buffer.from(userInfo.nickname, "base64").toString();
+      } else {
+        (item as any).nickname = "已删除";
+      }
+    }
+
+    return {
+      data,
+      count: total,
+      currentPage: page,
+    };
   }
 }

@@ -10,13 +10,19 @@ export class CommonController {
   @Get("getAllRegion")
   async getAllRegion() {
     const aData = await this.regionService.find({
-      type: 1,
+      where: {
+        type: 1,
+      },
     });
     const bData = await this.regionService.find({
-      type: 2,
+      where: {
+        type: 2,
+      },
     });
     const cData = await this.regionService.find({
-      type: 3,
+      where: {
+        type: 3,
+      },
     });
     const newData = [];
     for (const item of aData) {

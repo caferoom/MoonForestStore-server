@@ -1,5 +1,6 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Goods } from "./goods.entity";
 
 @Entity()
 export class FootPrint {
@@ -9,6 +10,7 @@ export class FootPrint {
   @Column({ type: "int", default: 0 })
   user_id: number;
 
+  @ManyToOne(() => Goods, (goods) => goods.id)
   @Column({ type: "int", default: 0 })
   goods_id: number;
 

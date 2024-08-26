@@ -11,6 +11,11 @@ import { CommonModule } from "./modules/common/common.module";
 import { FreightModule } from "./modules/freight/freight.module";
 import { NoticeModule } from "./modules/notice/notice.module";
 import { AdModule } from "./modules/ad/ad.module";
+import { CartModule } from "./modules/cart/cart.module";
+import { GoodsModule } from "./modules/goods/goods.module";
+import { CategoryModule } from "./modules/category/category.module";
+import { ProductModule } from "./modules/product/product.module";
+import { GoodsSpecificationModule } from "./modules/goodsSpecification/goodsSpecification.module";
 
 @Module({
   imports: [
@@ -21,9 +26,14 @@ import { AdModule } from "./modules/ad/ad.module";
     AuthModule,
     UsersModule,
     AdminModule,
+    GoodsModule,
     AdModule,
+    CategoryModule,
+    ProductModule,
+    GoodsSpecificationModule,
     StoreModule,
     FreightModule,
+    CartModule,
     CommonModule,
     NoticeModule,
     ShipperModule,

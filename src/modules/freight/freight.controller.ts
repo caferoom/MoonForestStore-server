@@ -23,13 +23,13 @@ export class FreightController {
 
   @Get("freight")
   async freight() {
-    const data = await this.freightTemplateService.find({ is_delete: false });
+    const data = await this.freightTemplateService.find({ where: { is_delete: false } });
     return data;
   }
 
   @Get("exceptArea")
   async exceptAreaAction() {
-    const data = await this.exceptAreaService.find({ is_delete: false });
+    const data = await this.exceptAreaService.find({ where: { is_delete: false } });
     const _data: any[] = cloneDeep(data);
     for (const item of _data) {
       const area = item.area;
@@ -61,7 +61,7 @@ export class FreightController {
 
   @Post("getareadata")
   async getareadata() {
-    const all = await this.regionService.find({ type: 1 });
+    const all = await this.regionService.find({ where: { type: 1 } });
     return all.map((a) => ({ id: a.id, name: a.name }));
   }
 
@@ -106,9 +106,11 @@ export class FreightController {
 
     for (const item of arr) {
       const e = await this.exceptAreaDetailService.find({
-        except_area_id: info.id,
-        area: item,
-        is_delete: false,
+        where: {
+          except_area_id: info.id,
+          area: item,
+          is_delete: false,
+        },
       });
       if (e.length === 0) {
         await this.exceptAreaDetailService.add({
@@ -192,9 +194,11 @@ export class FreightController {
     const { id } = req.body;
 
     const model = await this.freightTemplateGroupService.find({
-      template_id: id,
-      is_delete: false,
-      area: Not("0"),
+      where: {
+        template_id: id,
+        is_delete: false,
+        area: Not("0"),
+      },
     });
     const data = cloneDeep(model);
 
@@ -207,19 +211,23 @@ export class FreightController {
         (item as any).freeByNumber = false;
       }
       const areaData = area.split(",");
-      const info = await this.regionService.find({ id: In(areaData) });
+      const info = await this.regionService.find({ where: { id: In(areaData) } });
 
       (item as any).areaName = info.map((i) => i.name).join(",");
     }
 
     const defaultData = await this.freightTemplateGroupService.find({
-      template_id: id,
-      area: "0",
-      is_delete: false,
+      where: {
+        template_id: id,
+        area: "0",
+        is_delete: false,
+      },
     });
 
     const freight = await this.freightTemplateService.find({
-      id: id,
+      where: {
+        id: id,
+      },
     });
 
     const info = {
@@ -244,10 +252,12 @@ export class FreightController {
 
     if (idInfo.length != 0) {
       const d = await this.freightTemplateGroupService.find({
-        id: Not(In(idInfo)),
-        template_id: info.id,
-        is_default: false,
-        is_delete: false,
+        where: {
+          id: Not(In(idInfo)),
+          template_id: info.id,
+          is_default: false,
+          is_delete: false,
+        },
       });
 
       const deleData = d.map((i) => i.id);
@@ -315,9 +325,11 @@ export class FreightController {
 
           for (const item of arr) {
             const e = await this.freightTemplateDetailService.find({
-              template_id: template_id,
-              area: item,
-              group_id: id,
+              where: {
+                template_id: template_id,
+                area: item,
+                group_id: id,
+              },
             });
             if (e && e.length !== 0) {
               await this.freightTemplateDetailService.add({
@@ -438,5 +450,4 @@ export class FreightController {
     const { id } = req.body;
     return await this.freightTemplateService.remove(Number(id));
   }
-
 }
