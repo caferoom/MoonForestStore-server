@@ -106,4 +106,14 @@ export class ShipperController {
     const { id, sort } = req.body;
     return await this.shipperService.edit(id, { sort_order: sort });
   }
+
+  @Get("delivery")
+  async indexAction() {
+    const data = await this.shipperService.find({
+      where: {
+        enabled: true,
+      },
+    });
+    return data;
+  }
 }

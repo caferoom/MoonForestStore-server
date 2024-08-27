@@ -16,6 +16,7 @@ import { GoodsModule } from "./modules/goods/goods.module";
 import { CategoryModule } from "./modules/category/category.module";
 import { ProductModule } from "./modules/product/product.module";
 import { GoodsSpecificationModule } from "./modules/goodsSpecification/goodsSpecification.module";
+import { SpecificationModule } from "./modules/specification/specification.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { GoodsSpecificationModule } from "./modules/goodsSpecification/goodsSpec
     FreightModule,
     CartModule,
     CommonModule,
+    SpecificationModule,
     NoticeModule,
     ShipperModule,
     OverviewModule,

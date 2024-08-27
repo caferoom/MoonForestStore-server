@@ -10,13 +10,21 @@ import { CategoryService } from "../category/category.service";
 import { Category } from "src/database/category.entity";
 import { Product } from "src/database/product.entity";
 import { ProductService } from "../product/product.service";
+import { CartService } from "../cart/cart.service";
+import { Cart } from "src/database/cart.entity";
+import { SpecificationService } from "../specification/specification.service";
+import { Specification } from "src/database/specification.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Goods, Category, GoodsSpecification, Product])],
+  imports: [
+    TypeOrmModule.forFeature([Goods, Category, Cart, GoodsSpecification, Specification, Product]),
+  ],
   providers: [
     GoodsService,
     GoodsSpecificationService,
+    SpecificationService,
     CategoryService,
+    CartService,
     ProductService,
     JwtStrategy,
   ],

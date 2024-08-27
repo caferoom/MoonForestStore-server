@@ -2,11 +2,13 @@ import { Controller, Get, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
 import { GoodsService } from "./goods.service";
-import { ILike } from "typeorm";
+import { ILike, LessThanOrEqual, MoreThan } from "typeorm";
 import { cloneDeep } from "lodash";
 import { CategoryService } from "../category/category.service";
 import { ProductService } from "../product/product.service";
 import { GoodsSpecificationService } from "../goodsSpecification/goodsSpecification.service";
+import { CartService } from "../cart/cart.service";
+import { SpecificationService } from "../specification/specification.service";
 
 @Controller("goods")
 @UseGuards(AuthGuard("jwt"))
@@ -14,6 +16,8 @@ export class GoodsController {
   constructor(
     private goodsService: GoodsService,
     private categoryService: CategoryService,
+    private specificationService: SpecificationService,
+    private cartService: CartService,
     private productService: ProductService,
     private goodsSpecificationService: GoodsSpecificationService,
   ) {}
@@ -80,14 +84,14 @@ export class GoodsController {
   async sortAction(@Request() req: Express.Request) {
     const { page = 1, size, index } = req.query;
 
-    if (index == 1) {
+    if (Number(index) == 1) {
       const [data1, count] = await this.goodsService.findAndCount({
         where: { is_delete: false },
         order: {
           sell_volume: "DESC",
         },
-        skip: (page - 1) * size,
-        take: size,
+        skip: (Number(page) - 1) * Number(size),
+        take: Number(size),
       });
 
       const data = cloneDeep(data1);
@@ -131,97 +135,630 @@ export class GoodsController {
         data,
         currentPage: page,
       };
-    } else if (index == 2) {
-      const _data = this.goodsService.find({
+    } else if (Number(index) == 2) {
+      const [_data, count] = await this.goodsService.findAndCount({
         where: { is_delete: false },
         order: {
           retail_price: "DESC",
         },
-        skip: (page - 1) * size,
-        take: size,
+        skip: (Number(page) - 1) * Number(size),
+        take: Number(size),
       });
 
       const data = cloneDeep(_data);
       for (const item of data) {
-        const info = await this.model("category")
-          .where({
-            id: item.category_id,
-          })
-          .find();
-        item.category_name = info.name;
+        const info = await this.categoryService.findOneById(item.category_id);
+        (item as any).category_name = info?.name;
+        if (!info) {
+          console.log("这里逻辑上不是不应该没有info?");
+        }
         if (item.is_on_sale == 1) {
-          item.is_on_sale = true;
+          (item as any).is_on_sale = true;
         } else {
-          item.is_on_sale = false;
+          (item as any).is_on_sale = false;
         }
         if (item.is_index == 1) {
-          item.is_index = true;
+          (item as any).is_index = true;
         } else {
-          item.is_index = false;
+          (item as any).is_index = false;
         }
-        const product = await this.model("product")
-          .where({
+        const _product = await this.productService.find({
+          where: {
             goods_id: item.id,
-            is_delete: 0,
-          })
-          .select();
+            is_delete: false,
+          },
+        });
+
+        const product = cloneDeep(_product);
         for (const ele of product) {
-          const spec = await this.model("goods_specification")
-            .where({
-              id: ele.goods_specification_ids,
-              is_delete: 0,
-            })
-            .find();
-          ele.value = spec.value;
-          ele.is_on_sale = ele.is_on_sale ? "1" : "0";
+          const spec = await this.goodsSpecificationService.findOne({
+            where: {
+              id: Number(ele.goods_specification_ids),
+              is_delete: false,
+            },
+          });
+
+          (ele as any).value = spec.value;
+          (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
         }
-        item.product = product;
+        (item as any).product = product;
       }
-      return this.success(data);
-    } else if (index == 3) {
-      const data = await model
-        .where({
-          is_delete: 0,
-        })
-        .order(["goods_number DESC"])
-        .page(page, size)
-        .countSelect();
-      for (const item of data.data) {
-        const info = await this.model("category")
-          .where({
-            id: item.category_id,
-          })
-          .find();
-        item.category_name = info.name;
+      return {
+        data,
+        count,
+        currentPage: page,
+      };
+    } else if (Number(index) == 3) {
+      const [_data, count] = await this.goodsService.findAndCount({
+        where: {
+          is_delete: false,
+        },
+        order: { goods_number: "DESC" },
+        skip: (Number(page) - 1) * Number(size),
+        take: Number(size),
+      });
+
+      const data = cloneDeep(_data);
+      for (const item of data) {
+        const info = await this.categoryService.findOneById(item.category_id);
+
+        (item as any).category_name = info.name;
         if (item.is_on_sale == 1) {
-          item.is_on_sale = true;
+          (item as any).is_on_sale = true;
         } else {
-          item.is_on_sale = false;
+          (item as any).is_on_sale = false;
         }
         if (item.is_index == 1) {
-          item.is_index = true;
+          (item as any).is_index = true;
         } else {
-          item.is_index = false;
+          (item as any).is_index = false;
         }
-        const product = await this.model("product")
-          .where({
+        const product = await this.productService.find({
+          where: {
             goods_id: item.id,
-            is_delete: 0,
-          })
-          .select();
+            is_delete: false,
+          },
+        });
+
         for (const ele of product) {
-          const spec = await this.model("goods_specification")
-            .where({
-              id: ele.goods_specification_ids,
-              is_delete: 0,
-            })
-            .find();
-          ele.value = spec.value;
-          ele.is_on_sale = ele.is_on_sale ? "1" : "0";
+          const spec = await this.goodsSpecificationService.findOne({
+            where: {
+              id: Number(ele.goods_specification_ids),
+              is_delete: false,
+            },
+          });
+          (ele as any).value = spec.value;
+          (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
         }
-        item.product = product;
+        (item as any).product = product;
       }
-      return this.success(data);
+      return {
+        currentPage: page,
+        data,
+        count,
+      };
     }
   }
+
+  @Get("onsale")
+  async onsaleAction(@Request() req: Express.Request) {
+    const { page = 1, size } = req.query;
+
+    const [_data, count] = await this.goodsService.findAndCount({
+      where: {
+        is_delete: false,
+        is_on_sale: 1,
+      },
+      order: {
+        sort_order: "asc",
+      },
+      skip: (Number(page) - 1) * Number(size),
+      take: Number(size),
+    });
+
+    const data = cloneDeep(_data);
+
+    for (const item of data) {
+      const info = await this.categoryService.findOneById(item.category_id);
+
+      if (!info) {
+        console.log("这里逻辑上不是不应该没有info?");
+      }
+      (item as any).category_name = info?.name;
+      // if (info.parent_id != 0) {
+      //     const parentInfo = await this.model('category').where({id: info.parent_id}).find();
+      //     item.category_p_name = parentInfo.name;
+      // }
+      if (item.is_on_sale == 1) {
+        (item as any).is_on_sale = true;
+      } else {
+        (item as any).is_on_sale = false;
+      }
+      if (item.is_index == 1) {
+        (item as any).is_index = true;
+      } else {
+        (item as any).is_index = false;
+      }
+      const product = await this.productService.find({
+        where: {
+          goods_id: item.id,
+          is_delete: false,
+        },
+      });
+
+      for (const ele of product) {
+        const spec = await this.goodsSpecificationService.findOne({
+          where: {
+            id: Number(ele.goods_specification_ids),
+            is_delete: false,
+          },
+        });
+
+        (ele as any).value = spec.value;
+        (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
+      }
+      (item as any).product = product;
+    }
+    return {
+      currentPage: page,
+      data,
+      count,
+    };
+  }
+
+  @Get("out")
+  async outAction(@Request() req: Express.Request) {
+    const { page = 1, size } = req.query;
+
+    const [_data, count] = await this.goodsService.findAndCount({
+      where: {
+        is_delete: false,
+        goods_number: LessThanOrEqual(0),
+      },
+      order: {
+        sort_order: "asc",
+      },
+      skip: Number(size) * (Number(page) - 1),
+      take: Number(size),
+    });
+
+    const data = cloneDeep(_data);
+
+    for (const item of data) {
+      const info = await this.categoryService.findOneById(item.category_id);
+
+      (item as any).category_name = info.name;
+      if (item.is_on_sale == 1) {
+        (item as any).is_on_sale = true;
+      } else {
+        (item as any).is_on_sale = false;
+      }
+      if (item.is_index == 1) {
+        (item as any).is_index = true;
+      } else {
+        (item as any).is_index = false;
+      }
+
+      const product = await this.productService.find({
+        where: {
+          goods_id: item.id,
+          is_delete: false,
+        },
+      });
+
+      for (const ele of product) {
+        const spec = await this.goodsSpecificationService.findOne({
+          where: {
+            id: Number(ele.goods_specification_ids),
+            is_delete: false,
+          },
+        });
+
+        (ele as any).value = spec.value;
+        (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
+      }
+      (item as any).product = product;
+    }
+    return {
+      data,
+      count,
+      currentPage: page,
+    };
+  }
+
+  @Get("drop")
+  async dropAction(@Request() req: Express.Request) {
+    const { page = 1, size } = req.query;
+    const [_data, count] = await this.goodsService.findAndCount({
+      where: {
+        is_delete: false,
+        is_on_sale: 0,
+      },
+      order: { id: "DESC" },
+      skip: Number(size) * (Number(page) - 1),
+      take: Number(size),
+    });
+
+    const data = cloneDeep(_data);
+    for (const item of data) {
+      const info = await this.categoryService.findOneById(item.category_id);
+
+      (item as any).category_name = info.name;
+      if (item.is_on_sale == 1) {
+        (item as any).is_on_sale = true;
+      } else {
+        (item as any).is_on_sale = false;
+      }
+      if (item.is_index == 1) {
+        (item as any).is_index = true;
+      } else {
+        (item as any).is_index = false;
+      }
+
+      const product = await this.productService.find({
+        where: {
+          goods_id: item.id,
+          is_delete: false,
+        },
+      });
+
+      for (const ele of product) {
+        const spec = await this.goodsSpecificationService.findOne({
+          where: {
+            id: Number(ele.goods_specification_ids),
+            is_delete: false,
+          },
+        });
+        (ele as any).value = spec.value;
+        (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
+      }
+      (item as any).product = product;
+    }
+    return {
+      data,
+      count,
+      currentPage: page,
+    };
+  }
+
+  @Get("saleStatus")
+  async saleStatusAction(@Request() req: Express.Request) {
+    const { id, status } = req.query;
+
+    let sale = 0;
+    if (status == "true") {
+      sale = 1;
+    }
+
+    await this.goodsService.update({ id: Number(id) }, { is_on_sale: sale });
+    await this.cartService.update(
+      { goods_id: Number(id) },
+      { is_on_sale: sale === 1, checked: sale },
+    );
+
+    return true;
+  }
+
+  @Get("productStatus")
+  async productStatusAction(@Request() req: Express.Request) {
+    const { id, status } = req.query;
+
+    await this.productService.update(
+      {
+        id: Number(id),
+      },
+      {
+        is_on_sale: status === "1",
+      },
+    );
+
+    await this.cartService.update(
+      {
+        product_id: Number(id),
+        is_delete: 0,
+      },
+      {
+        is_on_sale: status === "1",
+      },
+    );
+  }
+
+  @Get("indexShowStatus")
+  async indexShowStatusAction(@Request() req: Express.Request) {
+    const { id, status } = req.query;
+
+    let stat = 0;
+    if (status == "true") {
+      stat = 1;
+    }
+
+    await this.goodsService.update(
+      {
+        id: Number(id),
+      },
+      {
+        is_index: stat,
+      },
+    );
+  }
+
+  @Get("info")
+  async infoAction(@Request() req: Express.Request) {
+    const { id } = req.query;
+
+    const data = await this.goodsService.findOneById(Number(id));
+
+    const category_id = data.category_id;
+    const infoData = {
+      info: data,
+      category_id: category_id,
+    };
+    return infoData;
+  }
+
+  @Get("getAllSpecification")
+  async getAllSpecificationAction() {
+    const specInfo = await this.specificationService.find({
+      where: {
+        id: MoreThan(0),
+      },
+    });
+
+    const specOptionsData = [];
+    for (const spitem of specInfo) {
+      const info = {
+        value: spitem.id,
+        label: spitem.name,
+      };
+      specOptionsData.push(info);
+    }
+    return specOptionsData;
+  }
+
+  @Get("getAllCategory1")
+  async getAllCategory1Action() {
+    const data = await this.categoryService.find({
+      where: {
+        is_show: 1,
+        level: "L1",
+      },
+    });
+
+    const c_data = await this.categoryService.find({
+      where: {
+        is_show: 1,
+        level: "L2",
+      },
+    });
+
+    const newData = [];
+    for (const item of data) {
+      const children = [];
+      for (const citem of c_data) {
+        if (citem.parent_id === String(item.id)) {
+          children.push({
+            value: citem.id,
+            label: citem.name,
+          });
+        }
+      }
+      newData.push({
+        value: item.id,
+        label: item.name,
+        children: children,
+      });
+    }
+    return newData;
+  }
+
+  @Get("getAllCategory")
+  async getAllCategoryAction() {
+    const data = await this.categoryService.find({
+      where: {
+        is_show: 1,
+        level: "L1",
+      },
+      select: ["id", "name"],
+    });
+
+    const newData = [];
+    for (const item of data) {
+      const children = [];
+
+      const c_data = await this.categoryService.find({
+        where: {
+          is_show: 1,
+          level: "L2",
+          parent_id: String(item.id),
+        },
+        select: ["id", "name"],
+      });
+
+      for (const c_item of c_data) {
+        children.push({
+          value: c_item.id,
+          label: c_item.name,
+        });
+      }
+      newData.push({
+        value: item.id,
+        label: item.name,
+        children: children,
+      });
+    }
+    return newData;
+  }
+
+  async storeAction() {
+    const values = this.post('info');
+    const specData = this.post('specData');
+    const specValue = this.post('specValue');
+    const cateId = this.post('cateId');
+    const model = this.model('goods');
+    let picUrl = values.list_pic_url;
+    let goods_id = values.id;
+    values.category_id = cateId;
+    values.is_index = values.is_index ? 1 : 0;
+    values.is_new = values.is_new ? 1 : 0;
+    let id = values.id;
+    if (id > 0) {
+        await model.where({
+            id: id
+        }).update(values);
+        await this.model('cart').where({
+            goods_id: id
+        }).update({
+            checked: values.is_on_sale,
+            is_on_sale: values.is_on_sale,
+            list_pic_url: picUrl,
+            freight_template_id: values.freight_template_id
+        });
+        await this.model('product').where({
+            goods_id: id
+        }).update({
+            is_delete: 1
+        });
+        await this.model('goods_specification').where({
+            goods_id: id
+        }).update({
+            is_delete: 1
+        });
+        for (const item of specData) {
+            if (item.id > 0) {
+                await this.model('cart').where({
+                    product_id: item.id,
+                    is_delete: 0,
+                }).update({
+                    retail_price: item.retail_price,
+                    goods_specifition_name_value: item.value,
+                    goods_sn: item.goods_sn
+                });
+                delete item.is_delete;
+                item.is_delete = 0;
+                await this.model('product').where({
+                    id: item.id
+                }).update(item);
+                let specificationData = {
+                    value: item.value,
+                    specification_id: specValue,
+                    is_delete: 0
+                };
+                await this.model('goods_specification').where({
+                    id: item.goods_specification_ids
+                }).update(specificationData);
+            } else {
+                let specificationData = {
+                    value: item.value,
+                    goods_id: id,
+                    specification_id: specValue
+                }
+                let specId = await this.model('goods_specification').add(specificationData);
+                item.goods_specification_ids = specId;
+                item.goods_id = id;
+                await this.model('product').add(item);
+            }
+        }
+  for(const [index, item] of values.gallery.entries()){
+    if(item.is_delete == 1 && item.id > 0){
+      await this.model('goods_gallery').where({
+        id:item.id
+      }).update({
+        is_delete:1
+      })
+    }
+    else if(item.is_delete == 0 && item.id > 0){
+      await this.model('goods_gallery').where({
+        id:item.id
+      }).update({
+        sort_order:index
+      })
+    }
+    else if(item.is_delete == 0 && item.id == 0){
+      await this.model('goods_gallery').add({
+        goods_id:id,
+        img_url:item.url,
+        sort_order:index
+      })
+    }
+  }
+    } else {
+        delete values.id;
+        goods_id = await model.add(values);
+        for (const item of specData) {
+            let specificationData = {
+                value: item.value,
+                goods_id: goods_id,
+                specification_id: specValue
+            }
+            let specId = await this.model('goods_specification').add(specificationData);
+            item.goods_specification_ids = specId;
+            item.goods_id = goods_id;
+            item.is_on_sale = 1;
+            await this.model('product').add(item);
+        }
+  for(const [index, item] of values.gallery.entries()){
+    await this.model('goods_gallery').add({
+      goods_id:goods_id,
+      img_url:item.url,
+      sort_order:index
+    })
+  }
+    }
+    let pro = await this.model('product').where({
+        goods_id: goods_id,
+        is_on_sale: 1,
+        is_delete: 0
+    }).select();
+    if (pro.length > 1) {
+        let goodsNum = await this.model('product').where({
+            goods_id: goods_id,
+            is_on_sale: 1,
+            is_delete: 0
+        }).sum('goods_number');
+        let retail_price = await this.model('product').where({
+            goods_id: goods_id,
+            is_on_sale: 1,
+            is_delete: 0
+        }).getField('retail_price');
+        let maxPrice = Math.max(...retail_price);
+        let minPrice = Math.min(...retail_price);
+        let cost = await this.model('product').where({
+            goods_id: goods_id,
+            is_on_sale: 1,
+            is_delete: 0
+        }).getField('cost');
+        let maxCost = Math.max(...cost);
+        let minCost = Math.min(...cost);
+        let goodsPrice = '';
+        if(minPrice == maxPrice){
+            goodsPrice = minPrice;
+        }
+        else{
+            goodsPrice = minPrice + '~' + maxPrice;
+        }
+        let costPrice = minCost + '~' + maxCost;
+        await this.model('goods').where({
+            id: goods_id
+        }).update({
+            goods_number: goodsNum,
+            retail_price: goodsPrice,
+            cost_price: costPrice,
+            min_retail_price: minPrice,
+            min_cost_price: minCost,
+        });
+    } else {
+        let info = {
+            goods_number: pro[0].goods_number,
+            retail_price: pro[0].retail_price,
+            cost_price: pro[0].cost,
+            min_retail_price: pro[0].retail_price,
+            min_cost_price: pro[0].cost,
+        }
+        await this.model('goods').where({
+            id: goods_id
+        }).update(info);
+    }
+    return this.success(goods_id);
+}
+
 }
