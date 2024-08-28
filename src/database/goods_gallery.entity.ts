@@ -10,10 +10,10 @@ export class GoodsGallery {
   @Column({ type: "int", unsigned: true, default: 0 })
   goods_id: string;
 
-  @Column({ type: "varchar", length: 255 })
+  @Column({ type: "varchar", length: 255, default: "" })
   img_url: string;
 
-  @Column({ type: "varchar", length: 255 })
+  @Column({ type: "varchar", length: 255, default: "" })
   img_desc: string;
 
   @Column({ type: "int", unsigned: true, default: 5 })
@@ -25,7 +25,7 @@ export class GoodsGallery {
 
 export type IGoodsGalleryCreateMembers = TypeCreateMembers<
   GoodsGallery,
-  "goods_id" | "sort_order" | "is_delete",
+  "goods_id" | "sort_order" | "is_delete" | "img_desc" | "img_url",
   "id"
 >;
 
