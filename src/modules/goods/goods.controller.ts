@@ -2,7 +2,7 @@ import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
 import { GoodsService } from "./goods.service";
-import { ILike, LessThanOrEqual, MoreThan } from "typeorm";
+import { ILike, In, LessThanOrEqual, MoreThan, Not } from "typeorm";
 import { cloneDeep } from "lodash";
 import { CategoryService } from "../category/category.service";
 import { ProductService } from "../product/product.service";
@@ -1008,5 +1008,131 @@ export class GoodsController {
       await this.goodsService.update({ id: goods_id }, info);
     }
     return true;
+  }
+
+  @Post("checkSku")
+  async checkSkuAction(@Request() req: Express.Request) {
+    const { info } = req.body;
+
+    if (info.id > 0) {
+      const data = await this.productService.find({
+        where: {
+          id: Not(In([info.id])),
+          goods_sn: info.goods_sn,
+          is_delete: false,
+        },
+      });
+      if (data && data.length !== 0) {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: "重复",
+        });
+      } else {
+        return true;
+      }
+    } else {
+      const data = await this.productService.find({
+        where: {
+          goods_sn: info.goods_sn,
+          is_delete: false,
+        },
+      });
+
+      if (data && data.length !== 0) {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: "重复",
+        });
+      } else {
+        return true;
+      }
+    }
+  }
+
+  @Post("updateSort")
+  async updateSortAction(@Request() req: Express.Request) {
+    const { id, sort } = req.body;
+
+    await this.goodsService.update(
+      {
+        id: id,
+      },
+      {
+        sort_order: sort,
+      },
+    );
+
+    const data = await this.goodsService.findOneById(id);
+    return data;
+  }
+
+  // @Post("updateShortName")
+  // async updateShortNameAction(@Request() req: Express.Request) {
+  //   const { id, short_name } = req.body;
+
+  //   const data = await this.goodsService.update(
+  //     {
+  //       id: id,
+  //     },
+  //     {
+  //       short_name: short_name,
+  //     },
+  //   );
+
+  //   return data.raw;
+  // }
+
+  // @Get("galleryList")
+  // async galleryListAction(@Request() req: Express.Request) {
+  //   const { id } = req.query;
+
+  //   const data = await this.goodsGalleryService.find({
+  //     where: {
+  //       goods_id: String(id),
+  //       is_delete: false,
+  //     },
+  //   });
+
+  //   return data;
+  // }
+
+  @Post("gallery")
+  async galleryAction(@Request() req: Express.Request) {
+    const { url, good_id: id } = req.body;
+
+    const info = {
+      goods_id: id,
+      img_url: url,
+    };
+    await this.goodsGalleryService.add(info);
+    return true;
+  }
+
+  @Post("getGalleryList")
+  async getGalleryListAction(@Request() req: Express.Request) {
+    const { goodsId } = req.body;
+    const data = await this.goodsGalleryService.find({
+      where: {
+        goods_id: goodsId,
+        is_delete: false,
+      },
+      order: {
+        sort_order: "asc",
+      },
+    });
+
+    const galleryData = [];
+    for (const item of data) {
+      const pdata = {
+        id: item.id,
+        url: item.img_url,
+        is_delete: 0,
+      };
+      galleryData.push(pdata);
+    }
+    const info = {
+      galleryData: galleryData,
+    };
+    return info;
   }
 }
