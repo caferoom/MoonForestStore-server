@@ -22,8 +22,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const error = exception.getResponse();
       response.status(HttpStatus.OK).json({
         data: null,
-        status: error["code"],
-        extra: {},
+        // status: error["code"],
+        // extra: {},
         message: error["message"],
         success: false,
       });

@@ -16,7 +16,7 @@ export class Category {
   front_desc: string;
 
   @Column({ type: "int", unsigned: true, default: 0 })
-  parent_id: string;
+  parent_id: number;
 
   @Column({ type: "tinyint", unsigned: true, default: 50 })
   sort_order: number;
@@ -24,7 +24,7 @@ export class Category {
   @Column({ type: "tinyint", width: 1, default: 0 })
   show_index: boolean;
 
-  @Column({ type: "tinyint", unsigned: true, default: 1 })
+  @Column({ type: "tinyint", width: 1, unsigned: true, default: 1 })
   is_show: number;
 
   @Column({ type: "varchar", length: 255, default: null })
@@ -43,10 +43,10 @@ export class Category {
   p_height: number;
 
   @Column({ type: "tinyint", width: 1, default: 0 })
-  is_category: boolean;
+  is_category: number;
 
   @Column({ type: "tinyint", width: 1, default: 0 })
-  is_channel: boolean;
+  is_channel: number;
 }
 
 export type ICategoryCreateMembers = TypeCreateMembers<

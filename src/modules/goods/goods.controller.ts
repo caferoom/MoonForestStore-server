@@ -52,7 +52,7 @@ export class GoodsController {
 
     const cateData = await this.categoryService.find({
       where: {
-        parent_id: "0",
+        parent_id: 0,
       },
     });
 
@@ -644,7 +644,7 @@ export class GoodsController {
     for (const item of data) {
       const children = [];
       for (const citem of c_data) {
-        if (citem.parent_id === String(item.id)) {
+        if (citem.parent_id === item.id) {
           children.push({
             value: citem.id,
             label: citem.name,
@@ -678,7 +678,7 @@ export class GoodsController {
         where: {
           is_show: 1,
           level: "L2",
-          parent_id: String(item.id),
+          parent_id: item.id,
         },
         select: ["id", "name"],
       });
@@ -698,204 +698,239 @@ export class GoodsController {
     return newData;
   }
 
-  // async storeAction() {
-  //   const values = this.post("info");
-  //   const specData = this.post("specData");
-  //   const specValue = this.post("specValue");
-  //   const cateId = this.post("cateId");
-  //   const model = this.model("goods");
-  //   const picUrl = values.list_pic_url;
-  //   let goods_id = values.id;
-  //   values.category_id = cateId;
-  //   values.is_index = values.is_index ? 1 : 0;
-  //   values.is_new = values.is_new ? 1 : 0;
-  //   const id = values.id;
-  //   if (id > 0) {
-  //     await model
-  //       .where({
-  //         id: id,
-  //       })
-  //       .update(values);
-  //     await this.model("cart")
-  //       .where({
-  //         goods_id: id,
-  //       })
-  //       .update({
-  //         checked: values.is_on_sale,
-  //         is_on_sale: values.is_on_sale,
-  //         list_pic_url: picUrl,
-  //         freight_template_id: values.freight_template_id,
-  //       });
-  //     await this.model("product")
-  //       .where({
-  //         goods_id: id,
-  //       })
-  //       .update({
-  //         is_delete: 1,
-  //       });
-  //     await this.model("goods_specification")
-  //       .where({
-  //         goods_id: id,
-  //       })
-  //       .update({
-  //         is_delete: 1,
-  //       });
-  //     for (const item of specData) {
-  //       if (item.id > 0) {
-  //         await this.model("cart")
-  //           .where({
-  //             product_id: item.id,
-  //             is_delete: 0,
-  //           })
-  //           .update({
-  //             retail_price: item.retail_price,
-  //             goods_specifition_name_value: item.value,
-  //             goods_sn: item.goods_sn,
-  //           });
-  //         delete item.is_delete;
-  //         item.is_delete = 0;
-  //         await this.model("product")
-  //           .where({
-  //             id: item.id,
-  //           })
-  //           .update(item);
-  //         const specificationData = {
-  //           value: item.value,
-  //           specification_id: specValue,
-  //           is_delete: 0,
-  //         };
-  //         await this.model("goods_specification")
-  //           .where({
-  //             id: item.goods_specification_ids,
-  //           })
-  //           .update(specificationData);
-  //       } else {
-  //         const specificationData = {
-  //           value: item.value,
-  //           goods_id: id,
-  //           specification_id: specValue,
-  //         };
-  //         const specId = await this.model("goods_specification").add(specificationData);
-  //         item.goods_specification_ids = specId;
-  //         item.goods_id = id;
-  //         await this.model("product").add(item);
-  //       }
-  //     }
-  //     for (const [index, item] of values.gallery.entries()) {
-  //       if (item.is_delete == 1 && item.id > 0) {
-  //         await this.model("goods_gallery")
-  //           .where({
-  //             id: item.id,
-  //           })
-  //           .update({
-  //             is_delete: 1,
-  //           });
-  //       } else if (item.is_delete == 0 && item.id > 0) {
-  //         await this.model("goods_gallery")
-  //           .where({
-  //             id: item.id,
-  //           })
-  //           .update({
-  //             sort_order: index,
-  //           });
-  //       } else if (item.is_delete == 0 && item.id == 0) {
-  //         await this.model("goods_gallery").add({
-  //           goods_id: id,
-  //           img_url: item.url,
-  //           sort_order: index,
-  //         });
-  //       }
-  //     }
-  //   } else {
-  //     delete values.id;
-  //     goods_id = await model.add(values);
-  //     for (const item of specData) {
-  //       const specificationData = {
-  //         value: item.value,
-  //         goods_id: goods_id,
-  //         specification_id: specValue,
-  //       };
-  //       const specId = await this.model("goods_specification").add(specificationData);
-  //       item.goods_specification_ids = specId;
-  //       item.goods_id = goods_id;
-  //       item.is_on_sale = 1;
-  //       await this.model("product").add(item);
-  //     }
-  //     for (const [index, item] of values.gallery.entries()) {
-  //       await this.model("goods_gallery").add({
-  //         goods_id: goods_id,
-  //         img_url: item.url,
-  //         sort_order: index,
-  //       });
-  //     }
-  //   }
-  //   const pro = await this.model("product")
-  //     .where({
-  //       goods_id: goods_id,
-  //       is_on_sale: 1,
-  //       is_delete: 0,
-  //     })
-  //     .select();
-  //   if (pro.length > 1) {
-  //     const goodsNum = await this.model("product")
-  //       .where({
-  //         goods_id: goods_id,
-  //         is_on_sale: 1,
-  //         is_delete: 0,
-  //       })
-  //       .sum("goods_number");
-  //     const retail_price = await this.model("product")
-  //       .where({
-  //         goods_id: goods_id,
-  //         is_on_sale: 1,
-  //         is_delete: 0,
-  //       })
-  //       .getField("retail_price");
-  //     const maxPrice = Math.max(...retail_price);
-  //     const minPrice = Math.min(...retail_price);
-  //     const cost = await this.model("product")
-  //       .where({
-  //         goods_id: goods_id,
-  //         is_on_sale: 1,
-  //         is_delete: 0,
-  //       })
-  //       .getField("cost");
-  //     const maxCost = Math.max(...cost);
-  //     const minCost = Math.min(...cost);
-  //     let goodsPrice = "";
-  //     if (minPrice == maxPrice) {
-  //       goodsPrice = minPrice;
-  //     } else {
-  //       goodsPrice = minPrice + "~" + maxPrice;
-  //     }
-  //     const costPrice = minCost + "~" + maxCost;
-  //     await this.model("goods")
-  //       .where({
-  //         id: goods_id,
-  //       })
-  //       .update({
-  //         goods_number: goodsNum,
-  //         retail_price: goodsPrice,
-  //         cost_price: costPrice,
-  //         min_retail_price: minPrice,
-  //         min_cost_price: minCost,
-  //       });
-  //   } else {
-  //     const info = {
-  //       goods_number: pro[0].goods_number,
-  //       retail_price: pro[0].retail_price,
-  //       cost_price: pro[0].cost,
-  //       min_retail_price: pro[0].retail_price,
-  //       min_cost_price: pro[0].cost,
-  //     };
-  //     await this.model("goods")
-  //       .where({
-  //         id: goods_id,
-  //       })
-  //       .update(info);
-  //   }
-  //   return this.success(goods_id);
-  // }
+  @Post("store")
+  async storeAction(@Request() req: Express.Request) {
+    const { info: values, specData, specValue, cateId } = req.body;
+
+    const picUrl = values.list_pic_url;
+    const goods_id = values.id;
+    values.category_id = cateId;
+    values.is_index = values.is_index ? 1 : 0;
+    values.is_new = values.is_new ? 1 : 0;
+    console.log("1231", values);
+    const id = values.id;
+    if (id > 0) {
+      await this.goodsService.update(
+        {
+          id: id,
+        },
+        values,
+      );
+
+      await this.cartService.update(
+        {
+          goods_id: id,
+        },
+        {
+          checked: values.is_on_sale,
+          is_on_sale: values.is_on_sale,
+          list_pic_url: picUrl,
+          freight_template_id: values.freight_template_id,
+        },
+      );
+
+      await this.productService.update(
+        {
+          goods_id: id,
+        },
+        {
+          is_delete: true,
+        },
+      );
+
+      await this.goodsSpecificationService.update(
+        {
+          goods_id: id,
+        },
+        {
+          is_delete: true,
+        },
+      );
+
+      for (const item of specData) {
+        if (item.id > 0) {
+          await this.cartService.update(
+            {
+              product_id: item.id,
+              is_delete: 0,
+            },
+            {
+              retail_price: item.retail_price,
+              goods_specifition_name_value: item.value,
+              goods_sn: item.goods_sn,
+            },
+          );
+
+          delete item.is_delete;
+          item.is_delete = 0;
+          await this.productService.update(
+            {
+              id: item.id,
+            },
+            {
+              ...item,
+            },
+          );
+          const specificationData = {
+            value: item.value,
+            specification_id: specValue,
+            is_delete: false,
+          };
+          await this.goodsSpecificationService.update(
+            { id: item.goods_specification_ids },
+            specificationData,
+          );
+        } else {
+          const specificationData = {
+            value: item.value,
+            goods_id: id,
+            specification_id: specValue,
+            pic_url: null,
+          };
+
+          const ss = await this.goodsSpecificationService.add(specificationData);
+
+          item.goods_specification_ids = ss.id;
+          item.goods_id = id;
+          await this.productService.add(item);
+        }
+      }
+      for (const [index, item] of values.gallery.entries()) {
+        if (item.is_delete == 1 && item.id > 0) {
+          await this.goodsGalleryService.update(
+            {
+              id: item.id,
+            },
+            {
+              is_delete: true,
+            },
+          );
+        } else if (item.is_delete == 0 && item.id > 0) {
+          await this.goodsGalleryService.update(
+            {
+              id: item.id,
+            },
+            {
+              sort_order: index,
+            },
+          );
+        } else if (item.is_delete == 0 && item.id == 0) {
+          await this.goodsGalleryService.add({
+            goods_id: id,
+            img_url: item.url,
+            sort_order: index,
+          });
+        }
+      }
+    } else {
+      delete values.id;
+      const g = await this.goodsService.add(values);
+      const goods_id = g.id;
+      for (const item of specData) {
+        const specificationData = {
+          value: item.value,
+          goods_id: goods_id,
+          specification_id: specValue,
+          pic_url: null,
+        };
+        const specId = await this.goodsSpecificationService.add(specificationData);
+        item.goods_specification_ids = specId;
+        item.goods_id = goods_id;
+        item.is_on_sale = 1;
+        await this.productService.add(item);
+      }
+      for (const [index, item] of values.gallery.entries()) {
+        await this.goodsGalleryService.add({
+          goods_id: String(goods_id),
+          img_url: item.url,
+          sort_order: index,
+        });
+      }
+    }
+
+    const pro = await this.productService.find({
+      where: {
+        goods_id: goods_id,
+        is_on_sale: true,
+        is_delete: false,
+      },
+    });
+
+    if (pro.length > 1) {
+      const qb = await this.productService.createQueryBuilder("ps");
+      const abc = await qb
+        .where({
+          goods_id: goods_id,
+          is_on_sale: 1,
+          is_delete: 0,
+        })
+        .select("SUM(ps.goods_number)", "goodsNum")
+        .getRawOne();
+
+      const goodsNum = abc.goodsNum;
+
+      const ggg = await qb
+        .where({
+          goods_id: goods_id,
+          is_on_sale: 1,
+          is_delete: 0,
+        })
+        .select("SUM(ps.retail_price)", "goodsNum")
+        .getRawOne();
+
+      const retail_price = ggg.goodsNum;
+
+      const maxPrice = Math.max(...retail_price);
+      const minPrice = Math.min(...retail_price);
+
+      const c = await this.productService.find({
+        where: {
+          goods_id: goods_id,
+          is_on_sale: true,
+          is_delete: false,
+        },
+        select: ["cost"],
+      });
+      const cost = c.map((c) => c.cost);
+
+      const maxCost = Math.max(...cost);
+      const minCost = Math.min(...cost);
+      let goodsPrice = "";
+      if (minPrice == maxPrice) {
+        goodsPrice = `${minPrice}`;
+      } else {
+        goodsPrice = minPrice + "~" + maxPrice;
+      }
+      const costPrice = minCost + "~" + maxCost;
+      await this.goodsService.update(
+        {
+          id: goods_id,
+        },
+        {
+          goods_number: goodsNum,
+          retail_price: goodsPrice,
+          cost_price: costPrice,
+          min_retail_price: minPrice,
+          min_cost_price: minCost,
+        },
+      );
+    } else {
+      const info = {
+        goods_number: Number(pro[0].goods_number),
+        retail_price: String(pro[0].retail_price),
+        cost_price: String(pro[0].cost),
+        min_retail_price: Number(pro[0].retail_price),
+        min_cost_price: pro[0].cost,
+      };
+      await this.goodsService.update(
+        {
+          id: goods_id,
+        },
+        info,
+      );
+    }
+    return goods_id;
+  }
 
   @Post("updatePrice")
   async updatePriceAction(@Request() req: Express.Request) {
@@ -1135,4 +1170,141 @@ export class GoodsController {
     };
     return info;
   }
+
+  // 好像没用到
+  @Post("deleteGalleryFile")
+  async deleteGalleryFileAction(@Request() req: Express.Request) {
+    const { url, id } = req.body;
+
+    await this.goodsGalleryService.update(
+      {
+        id: id,
+      },
+      {
+        is_delete: true,
+      },
+    );
+
+    return true;
+  }
+
+  @Post("galleryEdit")
+  async galleryEditAction(@Request() req: Express.Request) {
+    const values = req.body;
+
+    const data = values.data;
+    for (const item of data) {
+      const id = item.id;
+      const sort = parseInt(item.sort_order);
+      await this.goodsGalleryService.update(
+        {
+          id: id,
+        },
+        {
+          sort_order: sort,
+        },
+      );
+    }
+    return true;
+  }
+
+  @Post("deleteListPicUrl")
+  async deleteListPicUrlAction(@Request() req: Express.Request) {
+    const { id } = req.body;
+
+    await this.goodsService.update(
+      {
+        id: id,
+      },
+      {
+        list_pic_url: "",
+      },
+    );
+
+    return true;
+  }
+
+  @Post("destory")
+  async destoryAction(@Request() req: Express.Request) {
+    const { id } = req.body;
+    await this.goodsService.update(
+      {
+        id: id,
+      },
+      {
+        is_delete: true,
+      },
+    );
+
+    await this.productService.update(
+      {
+        goods_id: id,
+      },
+      {
+        is_delete: true,
+      },
+    );
+
+    await this.goodsSpecificationService.update(
+      {
+        goods_id: id,
+      },
+      {
+        is_delete: true,
+      },
+    );
+
+    return true;
+  }
+
+  //
+  // @Post("uploadHttpsImage")
+  // async uploadHttpsImageAction(@Request() req: Express.Request) {
+  //   const { url } = req.body;
+  //   const accessKey = think.config("qiniuHttps.access_key");
+  //   const secretKey = think.config("qiniuHttps.secret_key");
+  //   const domain = think.config("qiniuHttps.domain");
+  //   const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
+  //   const config = new qiniu.conf.Config();
+  //   const zoneNum = think.config("qiniuHttps.zoneNum");
+  //   if (zoneNum == 0) {
+  //     config.zone = qiniu.zone.Zone_z0;
+  //   } else if (zoneNum == 1) {
+  //     config.zone = qiniu.zone.Zone_z1;
+  //   } else if (zoneNum == 2) {
+  //     config.zone = qiniu.zone.Zone_z2;
+  //   } else if (zoneNum == 3) {
+  //     config.zone = qiniu.zone.Zone_na0;
+  //   } else if (zoneNum == 4) {
+  //     config.zone = qiniu.zone.Zone_as0;
+  //   }
+  //   const bucketManager = new qiniu.rs.BucketManager(mac, config);
+  //   const bucket = think.config("qiniuHttps.bucket");
+  //   const key = think.uuid(32);
+  //   await think.timeout(500);
+  //   const uploadQiniu = async () => {
+  //     return new Promise((resolve, reject) => {
+  //       try {
+  //         bucketManager.fetch(url, bucket, key, function (err, respBody, respInfo) {
+  //           if (err) {
+  //             console.log(err);
+  //             //throw err;
+  //           } else {
+  //             if (respInfo.statusCode == 200) {
+  //               resolve(respBody.key);
+  //             } else {
+  //               console.log(respInfo.statusCode);
+  //             }
+  //           }
+  //         });
+  //       } catch (e) {
+  //         return resolve(null);
+  //       }
+  //     });
+  //   };
+  //   const httpsUrl = await uploadQiniu();
+  //   console.log(httpsUrl);
+  //   const lastUrl = domain + httpsUrl;
+  //   return this.success(lastUrl);
+  // }
 }

@@ -8,6 +8,8 @@ import {
   ObjectId,
   QueryRunner,
   Repository,
+  SaveOptions,
+  SelectQueryBuilder,
 } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
@@ -31,6 +33,10 @@ export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepP
     }
 
     return this.repository.save(one);
+  }
+
+  async save(entities: DeepPartial<T>, options?: SaveOptions) {
+    return this.repository.save(entities, options);
   }
 
   async update(
@@ -61,6 +67,21 @@ export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepP
     return this.repository.delete(id);
   }
 
+  async delete(
+    criteria:
+      | string
+      | number
+      | string[]
+      | Date
+      | ObjectId
+      | FindOptionsWhere<T>
+      | number[]
+      | Date[]
+      | ObjectId[],
+  ): Promise<DeleteResult> {
+    return this.repository.delete(criteria);
+  }
+
   async findBy(where: FindOptionsWhere<T> | FindOptionsWhere<T>[]): Promise<T[]> {
     return this.repository.findBy(where);
   }
@@ -77,7 +98,7 @@ export abstract class BaseService<T, CI extends DeepPartial<T>, UI extends DeepP
     return this.repository.find(options);
   }
 
-  async createQueryBuilder(alias?: string, queryRunner?: QueryRunner) {
+  createQueryBuilder(alias?: string, queryRunner?: QueryRunner): SelectQueryBuilder<T> {
     return this.repository.createQueryBuilder(alias, queryRunner);
   }
 }

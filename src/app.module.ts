@@ -19,6 +19,8 @@ import { GoodsSpecificationModule } from "./modules/goodsSpecification/goodsSpec
 import { SpecificationModule } from "./modules/specification/specification.module";
 import { GoodsGalleryModule } from "./modules/goodsGallery/goodsGallery.module";
 import { FreightTemplateModule } from "./modules/freight_template/freight_template.module";
+import { UploadModule } from "./modules/upload/upload.module";
+import { WapModule } from "./modules/wap/wap.module";
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { FreightTemplateModule } from "./modules/freight_template/freight_templa
     AuthModule,
     UsersModule,
     AdminModule,
+    WapModule,
+    UploadModule,
     GoodsModule,
     AdModule,
     CategoryModule,
