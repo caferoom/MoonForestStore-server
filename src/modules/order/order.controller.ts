@@ -1,119 +1,147 @@
 import { Controller, Get, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
+import { OrderService } from "./order.service";
+import { In, LessThan, Like } from "typeorm";
+import { SettingsService } from "../settings/settings.service";
+import { OrderExpressService } from "./order_express.service";
+import { RegionService } from "../common/region.service";
+import * as dayjs from "dayjs";
+import { UsersService } from "../users/users.service";
+import { OrderGoodsService } from "./order_goods.service";
 
 @UseGuards(AuthGuard("jwt"))
 @Controller("order")
-export class orderController {
-  // @Get("")
-  // async indexAction(@Request() req: Express.Request) {
-  //   const {
-  //     page = 1,
-  //     size = 10,
-  //     orderSn = "",
-  //     consignee = "",
-  //     logistic_code = "",
-  //     status = "",
-  //   } = req.body;
+export class OrderController {
+  constructor(
+    private usersService: UsersService,
+    private regionService: RegionService,
+    private orderService: OrderService,
+    private orderGoodsService: OrderGoodsService,
+    private orderExpressService: OrderExpressService,
+    private settingsService: SettingsService,
+  ) {}
 
-  //   let data = {};
-  //   const model = this.model("order");
-  //   if (logistic_code == "") {
-  //     data = await model
-  //       .where({
-  //         order_sn: ["like", `%${orderSn}%`],
-  //         consignee: ["like", `%${consignee}%`],
-  //         order_status: ["IN", status],
-  //         order_type: ["<", 7],
-  //       })
-  //       .order(["id DESC"])
-  //       .page(page, size)
-  //       .countSelect();
-  //     console.log(data);
-  //   } else {
-  //     const orderData = await this.model("order_express")
-  //       .where({
-  //         logistic_code: logistic_code,
-  //       })
-  //       .find();
-  //     const order_id = orderData.order_id;
-  //     data = await model
-  //       .where({
-  //         id: order_id,
-  //       })
-  //       .order(["id DESC"])
-  //       .page(page, size)
-  //       .countSelect();
-  //   }
-  //   for (const item of data.data) {
-  //     item.goodsList = await this.model("order_goods")
-  //       .field("goods_name,goods_aka,list_pic_url,number,goods_specifition_name_value,retail_price")
-  //       .where({
-  //         order_id: item.id,
-  //         is_delete: 0,
-  //       })
-  //       .select();
-  //     item.goodsCount = 0;
-  //     item.goodsList.forEach((v) => {
-  //       item.goodsCount += v.number;
-  //     });
-  //     const user = await this.model("user")
-  //       .where({
-  //         id: item.user_id,
-  //       })
-  //       .field("nickname,name,mobile,avatar")
-  //       .find();
-  //     if (!think.isEmpty(user)) {
-  //       user.nickname = Buffer.from(user.nickname, "base64").toString();
-  //     } else {
-  //       user.nickname = "已删除";
-  //     }
-  //     item.userInfo = user;
-  //     const province_name = await this.model("region")
-  //       .where({
-  //         id: item.province,
-  //       })
-  //       .getField("name", true);
-  //     const city_name = await this.model("region")
-  //       .where({
-  //         id: item.city,
-  //       })
-  //       .getField("name", true);
-  //     const district_name = await this.model("region")
-  //       .where({
-  //         id: item.district,
-  //       })
-  //       .getField("name", true);
-  //     item.full_region = province_name + city_name + district_name;
-  //     item.postscript = Buffer.from(item.postscript, "base64").toString();
-  //     item.add_time = moment.unix(item.add_time).format("YYYY-MM-DD HH:mm:ss");
-  //     if (item.pay_time != 0) {
-  //       item.pay_time = moment.unix(item.pay_time).format("YYYY-MM-DD HH:mm:ss");
-  //     } else {
-  //       item.pay_time = 0;
-  //     }
-  //     item.order_status_text = await this.model("order").getOrderStatusText(item.id);
-  //     const express = await this.model("order_express")
-  //       .where({
-  //         order_id: item.id,
-  //       })
-  //       .find();
-  //     if (!think.isEmpty(express)) {
-  //       item.expressInfo = express.shipper_name + express.logistic_code;
-  //     } else {
-  //       item.expressInfo = "";
-  //     }
-  //     // item.button_text = await this.model('order').getOrderBtnText(item.id);
-  //   }
-  //   return this.success(data);
-  // }
-  // async getAutoStatusAction() {
-  //     let status = await this.model('settings').where({
-  //         id: 1
-  //     }).field('autoDelivery').find();
-  //     let info = status.autoDelivery;
-  //     return this.success(info);
-  // }
+  @Get("")
+  async indexAction(@Request() req: Express.Request) {
+    const {
+      page = 1,
+      size = 10,
+      orderSn = "",
+      consignee = "",
+      logistic_code = "",
+      status = "",
+    } = req.query;
+
+    let data = [];
+    let count = 0;
+
+    if (logistic_code == "") {
+      [data, count] = await this.orderService.findAndCount({
+        where: {
+          order_sn: Like(`%${orderSn}%`),
+          consignee: Like(`%${consignee}%`),
+          order_status: In(String(status).split(",").map(Number)),
+          order_type: LessThan(7),
+        },
+        order: {
+          id: "DESC",
+        },
+        skip: (Number(page) - 1) * Number(size),
+        take: Number(size),
+      });
+    } else {
+      const orderData = await this.orderExpressService.findOne({
+        where: {
+          logistic_code: String(logistic_code),
+        },
+      });
+      const order_id = orderData.order_id;
+
+      [data, count] = await this.orderService.findAndCount({
+        where: {
+          id: order_id,
+        },
+        order: {
+          id: "DESC",
+        },
+        skip: (Number(page) - 1) * Number(size),
+        take: Number(size),
+      });
+    }
+    for (const item of data) {
+      item.goodsList = await this.orderGoodsService.find({
+        where: {
+          order_id: item.id,
+          is_delete: false,
+        },
+        select: [
+          "goods_name",
+          "goods_aka",
+          "list_pic_url",
+          "number",
+          "goods_specifition_name_value",
+          "retail_price",
+        ],
+      });
+
+      item.goodsCount = 0;
+      item.goodsList.forEach((v) => {
+        item.goodsCount += v.number;
+      });
+      const user = await this.usersService.findOne({
+        where: {
+          id: item.user_id,
+        },
+        select: ["nickname", "name", "mobile", "avatar"],
+      });
+
+      if (user) {
+        user.nickname = Buffer.from(user.nickname, "base64").toString();
+      } else {
+        user.nickname = "已删除";
+      }
+      item.userInfo = user;
+      const region = await this.regionService.findOneById(item.province);
+      const province_name = region.name;
+      const region1 = await this.regionService.findOneById(item.city);
+      const city_name = region1.name;
+      const region2 = await this.regionService.findOneById(item.district);
+      const district_name = region2.name;
+
+      item.full_region = province_name + city_name + district_name;
+      item.postscript = Buffer.from(item.postscript, "base64").toString();
+      item.add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
+      if (item.pay_time != 0) {
+        item.pay_time = dayjs(item.pay_time).format("YYYY-MM-DD HH:mm:ss");
+      } else {
+        item.pay_time = 0;
+      }
+      item.order_status_text = await this.orderService.getOrderStatusText(item.id);
+      const express = await this.orderExpressService.find({
+        where: {
+          order_id: item.id,
+        },
+      });
+      if (express && express.length !== 0) {
+        item.expressInfo = express[0].shipper_name + express[0].logistic_code;
+      } else {
+        item.expressInfo = "";
+      }
+      // item.button_text = await this.model('order').getOrderBtnText(item.id);
+    }
+    return {
+      data,
+      count,
+      currentPage: page,
+    };
+  }
+
+  @Get("getAutoStatus")
+  async getAutoStatusAction() {
+    const info = await this.settingsService.findOneById(1);
+    return info.autoDelivery;
+  }
   // async toDeliveryAction() {
   //     const page = this.get('page') || 1;
   //     const size = this.get('size') || 10;

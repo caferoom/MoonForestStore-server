@@ -1,5 +1,5 @@
+import { Type } from "class-transformer";
 import { IsBoolean, IsNumber, IsString } from "class-validator";
-import { Transform, Type } from "class-transformer";
 
 export class DeleteIconImageDTO {
   @IsNumber()
@@ -23,9 +23,11 @@ export class ChannelStatusDTO {
 }
 
 export class ShowStatusDTO {
+  @Type(() => Number)
   @IsNumber()
   id: number;
 
-  @IsString()
-  status: string;
+  @Type(() => Boolean)
+  @IsBoolean()
+  status: boolean;
 }

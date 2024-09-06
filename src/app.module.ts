@@ -21,6 +21,7 @@ import { GoodsGalleryModule } from "./modules/goodsGallery/goodsGallery.module";
 import { FreightTemplateModule } from "./modules/freight_template/freight_template.module";
 import { UploadModule } from "./modules/upload/upload.module";
 import { WapModule } from "./modules/wap/wap.module";
+import { OrderModule } from "./modules/order/order.module";
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { WapModule } from "./modules/wap/wap.module";
     ProductModule,
     GoodsSpecificationModule,
     StoreModule,
+    OrderModule,
     FreightModule,
     GoodsGalleryModule,
     CartModule,

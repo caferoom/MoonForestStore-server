@@ -142,7 +142,7 @@ export class CategoryController {
         id: id,
       },
       {
-        is_show: status === "true" ? 1 : 0,
+        is_show: status ? 1 : 0,
       },
     );
   }
