@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
-import { CategoryService } from "./category.service";
+import { CategoryService } from "../../services/category.service";
 import {
   CategoryStatusDTO,
   ChannelStatusDTO,

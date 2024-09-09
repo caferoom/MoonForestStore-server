@@ -1,16 +1,16 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
-import { GoodsService } from "./goods.service";
+import { GoodsService } from "../../services/goods.service";
 import { ILike, In, LessThanOrEqual, MoreThan, Not } from "typeorm";
 import { cloneDeep } from "lodash";
-import { CategoryService } from "../category/category.service";
-import { ProductService } from "../product/product.service";
-import { GoodsSpecificationService } from "../goodsSpecification/goodsSpecification.service";
-import { CartService } from "../cart/cart.service";
-import { SpecificationService } from "../specification/specification.service";
-import { GoodsGalleryService } from "../goodsGallery/goodsGallery.service";
-import { FreightTemplateService } from "../freight_template/freight_template.service";
+import { CategoryService } from "../../services/category.service";
+import { ProductService } from "../../services/product.service";
+import { GoodsSpecificationService } from "../../services/goodsSpecification.service";
+import { CartService } from "../../services/cart.service";
+import { SpecificationService } from "../../services/specification.service";
+import { GoodsGalleryService } from "../../services/goodsGallery.service";
+import { FreightTemplateService } from "../../services/freight_template.service";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
 import { BusinessException } from "src/common/exceptions/business.exception";
 

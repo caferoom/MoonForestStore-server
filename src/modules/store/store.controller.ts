@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { StoreService } from "./store.service";
+import { StoreService } from "../../services/store.service";
 
 @Controller("store")
 @UseGuards(AuthGuard("jwt"))

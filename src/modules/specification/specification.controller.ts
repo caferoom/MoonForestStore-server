@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { SpecificationService } from "./specification.service";
+import { SpecificationService } from "../../services/specification.service";
 import * as Express from "express";
-import { ProductService } from "../product/product.service";
-import { GoodsSpecificationService } from "../goodsSpecification/goodsSpecification.service";
+import { ProductService } from "../../services/product.service";
+import { GoodsSpecificationService } from "../../services/goodsSpecification.service";
 import { BusinessException } from "src/common/exceptions/business.exception";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
-import { GoodsService } from "../goods/goods.service";
-import { CartService } from "../cart/cart.service";
+import { GoodsService } from "../../services/goods.service";
+import { CartService } from "../../services/cart.service";
 import { MoreThan } from "typeorm";
 
 @Controller("specification")

@@ -1,18 +1,18 @@
 import { Controller, Get, UseGuards, Request, Post } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { UsersService } from "./users.service";
+import { UsersService } from "../../services/users.service";
 import * as dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
 import { BusinessException } from "src/common/exceptions/business.exception";
-import { CartService } from "../cart/cart.service";
+import { CartService } from "../../services/cart.service";
 import { ILike, LessThan } from "typeorm";
-import { OrderGoodsService } from "./order_goods.service";
-import { RegionService } from "../common/region.service";
-import { OrderService } from "../order/order.service";
-import { AddressService } from "../address/address.service";
+import { OrderGoodsService } from "../../services/order_goods.service";
+import { RegionService } from "../../services/region.service";
+import { OrderService } from "../../services/order.service";
+import { AddressService } from "../../services/address.service";
 import * as Express from "express";
-import { FootprintService } from "../footprint/footprint.service";
+import { FootprintService } from "../../services/footprint.service";
 
 @Controller("user")
 @UseGuards(AuthGuard("jwt"))
@@ -163,26 +163,9 @@ export class UsersController {
         (item as any).goodsCount += v.number;
       });
 
-      const province_name = await this.regionService.find({
-        where: {
-          id: Number(item.province),
-        },
-        select: ["name"],
-      });
-      const city_name = await this.regionService.find({
-        where: {
-          id: Number(item.city),
-        },
-        select: ["name"],
-      });
-      const district_name = await this.regionService.find({
-        where: {
-          id: Number(item.district),
-        },
-        select: ["name"],
-      });
-
-      (item as any).full_region = province_name[0].name + city_name[0].name + district_name[0].name;
+      (item as any).full_region = await this.regionService.getCombinedAddress(
+        Number(item.district),
+      );
       item.postscript = Buffer.from(item.postscript, "base64").toString();
       (item as any).add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
       (item as any).order_status_text = await this.orderService.getOrderStatusText(item.id);
@@ -206,28 +189,10 @@ export class UsersController {
     });
     const data = cloneDeep(_data);
     for (const item of data) {
-      const province_name = await this.regionService.findOne({
-        where: {
-          id: item.province_id,
-        },
-        select: ["name"],
-      });
-      const city_name = await this.regionService.findOne({
-        where: {
-          id: item.city_id,
-        },
-        select: ["name"],
-      });
-
-      const district_name = await this.regionService.findOne({
-        where: {
-          id: item.district_id,
-        },
-        select: ["name"],
-      });
-
-      (item as any).full_region =
-        province_name.name + city_name.name + district_name.name + item.address;
+      (item as any).full_region = await this.regionService.getCombinedAddress(
+        item.district_id,
+        item.address,
+      );
     }
     return {
       data: data,

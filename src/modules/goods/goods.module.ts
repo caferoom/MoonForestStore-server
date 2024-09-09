@@ -1,23 +1,23 @@
 import { Module } from "@nestjs/common";
-import { GoodsService } from "./goods.service";
+import { GoodsService } from "../../services/goods.service";
 import { GoodsController } from "./goods.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Goods } from "src/database/goods.entity";
-import { GoodsSpecification } from "src/database/goods_specification.entity";
-import { GoodsSpecificationService } from "../goodsSpecification/goodsSpecification.service";
-import { CategoryService } from "../category/category.service";
-import { Category } from "src/database/category.entity";
-import { Product } from "src/database/product.entity";
-import { ProductService } from "../product/product.service";
-import { CartService } from "../cart/cart.service";
-import { Cart } from "src/database/cart.entity";
-import { SpecificationService } from "../specification/specification.service";
-import { Specification } from "src/database/specification.entity";
-import { GoodsGalleryService } from "../goodsGallery/goodsGallery.service";
-import { GoodsGallery } from "src/database/goods_gallery.entity";
-import { FreightTemplateService } from "../freight_template/freight_template.service";
-import { FreightTemplate } from "src/database/freight_template.entity";
+import { Goods } from "src/entities/goods.entity";
+import { GoodsSpecification } from "src/entities/goods_specification.entity";
+import { GoodsSpecificationService } from "../../services/goodsSpecification.service";
+import { CategoryService } from "../../services/category.service";
+import { Category } from "src/entities/category.entity";
+import { Product } from "src/entities/product.entity";
+import { ProductService } from "../../services/product.service";
+import { CartService } from "../../services/cart.service";
+import { Cart } from "src/entities/cart.entity";
+import { SpecificationService } from "../../services/specification.service";
+import { Specification } from "src/entities/specification.entity";
+import { GoodsGalleryService } from "../../services/goodsGallery.service";
+import { GoodsGallery } from "src/entities/goods_gallery.entity";
+import { FreightTemplateService } from "../../services/freight_template.service";
+import { FreightTemplate } from "src/entities/freight_template.entity";
 
 @Module({
   imports: [

@@ -1,14 +1,14 @@
-import { Controller, Get, Request, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
-import { OrderService } from "./order.service";
+import { OrderService } from "../../services/order.service";
 import { In, LessThan, Like } from "typeorm";
-import { SettingsService } from "../settings/settings.service";
-import { OrderExpressService } from "./order_express.service";
-import { RegionService } from "../common/region.service";
+import { SettingsService } from "../../services/settings.service";
+import { OrderExpressService } from "../../services/order_express.service";
+import { RegionService } from "../../services/region.service";
 import * as dayjs from "dayjs";
-import { UsersService } from "../users/users.service";
-import { OrderGoodsService } from "./order_goods.service";
+import { UsersService } from "../../services/users.service";
+import { OrderGoodsService } from "../../services/order_goods.service";
 
 @UseGuards(AuthGuard("jwt"))
 @Controller("order")
@@ -102,14 +102,7 @@ export class OrderController {
         user.nickname = "已删除";
       }
       item.userInfo = user;
-      const region = await this.regionService.findOneById(item.province);
-      const province_name = region.name;
-      const region1 = await this.regionService.findOneById(item.city);
-      const city_name = region1.name;
-      const region2 = await this.regionService.findOneById(item.district);
-      const district_name = region2.name;
-
-      item.full_region = province_name + city_name + district_name;
+      item.full_region = await this.regionService.getCombinedAddress(item.district);
       item.postscript = Buffer.from(item.postscript, "base64").toString();
       item.add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
       if (item.pay_time != 0) {
@@ -133,7 +126,7 @@ export class OrderController {
     return {
       data,
       count,
-      currentPage: page,
+      currentPage: Number(page),
     };
   }
 
@@ -475,58 +468,60 @@ export class OrderController {
   //     const latestExpressInfo = await this.model('order_express').printExpress();
   //     return this.success(latestExpressInfo);
   // }
-  // async getMianExpressAction() {
-  //     const orderId = this.post('orderId');
-  //     const sender = this.post('sender');
-  //     const receiver = this.post('receiver');
-  //     console.log(orderId);
-  //     console.log(sender);
-  //     console.log(receiver);
-  //     let senderOptions = sender.senderOptions;
-  //     let receiveOptions = receiver.receiveOptions;
-  //     let senderInfo = {
-  //         Name: sender.name,
-  //         Tel: sender.mobile,
-  //         ProvinceName: await this.model('region').where({
-  //             id: senderOptions[0]
-  //         }).getField('name', true),
-  //         CityName: await this.model('region').where({
-  //             id: senderOptions[1]
-  //         }).getField('name', true),
-  //         ExpAreaName: await this.model('region').where({
-  //             id: senderOptions[2]
-  //         }).getField('name', true),
-  //         Address: sender.address
-  //     };
-  //     let receiverInfo = {
-  //         Name: receiver.name,
-  //         Tel: receiver.mobile,
-  //         ProvinceName: await this.model('region').where({
-  //             id: receiveOptions[0]
-  //         }).getField('name', true),
-  //         CityName: await this.model('region').where({
-  //             id: receiveOptions[1]
-  //         }).getField('name', true),
-  //         ExpAreaName: await this.model('region').where({
-  //             id: receiveOptions[2]
-  //         }).getField('name', true),
-  //         Address: receiver.address
-  //     };
-  //     // 每次重新生成一次订单号，这样，不会出现已经下过单的情况了。
-  //     const expressType = this.post('expressType');
-  //     const latestExpressInfo = await this.model('order_express').getMianExpress(orderId, senderInfo, receiverInfo, expressType);
-  //     console.log('lastExpressInfo++++++++++++++++++++++');
-  //     console.log(latestExpressInfo);
-  //     if (latestExpressInfo.ResultCode == 100) {
-  //         // 获取快递单号成功，然后存入order_express中
-  //         this.orderExpressAdd(latestExpressInfo, orderId)
-  //     }
-  //     return this.success({
-  //         latestExpressInfo: latestExpressInfo,
-  //         sender: senderInfo,
-  //         receiver: receiverInfo
-  //     });
+
+  // @Post("getMianExpress")
+  // async getMianExpressAction(@Request() req: Express.Request) {
+  //   const { orderId, sender, receiver, expressType } = req.body;
+  //   const senderOptions = sender.senderOptions;
+  //   const receiveOptions = receiver.receiveOptions;
+
+  //   const senderProvince = await this.regionService.repository.findOneBy({ id: senderOptions[0] });
+  //   const senderCity = await this.regionService.repository.findOneBy({ id: senderOptions[1] });
+  //   const senderArea = await this.regionService.repository.findOneBy({ id: senderOptions[2] });
+
+  //   const senderInfo = {
+  //     Name: sender.name,
+  //     Tel: sender.mobile,
+  //     ProvinceName: senderProvince.name,
+  //     CityName: senderCity.name,
+  //     ExpAreaName: senderArea.name,
+  //     Address: sender.address,
+  //   };
+
+  //   const receiveProvince = await this.regionService.repository.findOneBy({
+  //     id: receiveOptions[0],
+  //   });
+  //   const receiveCity = await this.regionService.repository.findOneBy({ id: receiveOptions[1] });
+  //   const receiveArea = await this.regionService.repository.findOneBy({ id: receiveOptions[2] });
+
+  //   const receiverInfo = {
+  //     Name: receiver.name,
+  //     Tel: receiver.mobile,
+  //     ProvinceName: receiveProvince.name,
+  //     CityName: receiveCity.name,
+  //     ExpAreaName: receiveArea.name,
+  //     Address: receiver.address,
+  //   };
+  //   // 每次重新生成一次订单号，这样，不会出现已经下过单的情况了。
+  //   const latestExpressInfo = await this.model("order_express").getMianExpress(
+  //     orderId,
+  //     senderInfo,
+  //     receiverInfo,
+  //     expressType,
+  //   );
+  //   console.log("lastExpressInfo++++++++++++++++++++++");
+  //   console.log(latestExpressInfo);
+  //   if (latestExpressInfo.ResultCode == 100) {
+  //     // 获取快递单号成功，然后存入order_express中
+  //     this.orderExpressAdd(latestExpressInfo, orderId);
+  //   }
+  //   return this.success({
+  //     latestExpressInfo: latestExpressInfo,
+  //     sender: senderInfo,
+  //     receiver: receiverInfo,
+  //   });
   // }
+
   // async rePrintExpressAction() {
   //     const date = new Date();
   //     let orderId = this.get('orderId')

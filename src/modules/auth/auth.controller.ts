@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
   Get,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import { AuthService } from "../../services/auth.service";
 import { AuthGuard } from "@nestjs/passport";
 
 @Controller("auth")
@@ -34,6 +34,7 @@ export class AuthController {
     const jwt = await this.authService.login({
       username: user.username,
       password: user.password,
+      id: user.id,
     });
 
     return {

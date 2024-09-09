@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
-import { OverviewModule } from "./modules/overview/overview.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AdminModule } from "./modules/admin/admin.module";
 import { StoreModule } from "./modules/store/store.module";
@@ -14,11 +13,7 @@ import { AdModule } from "./modules/ad/ad.module";
 import { CartModule } from "./modules/cart/cart.module";
 import { GoodsModule } from "./modules/goods/goods.module";
 import { CategoryModule } from "./modules/category/category.module";
-import { ProductModule } from "./modules/product/product.module";
-import { GoodsSpecificationModule } from "./modules/goodsSpecification/goodsSpecification.module";
 import { SpecificationModule } from "./modules/specification/specification.module";
-import { GoodsGalleryModule } from "./modules/goodsGallery/goodsGallery.module";
-import { FreightTemplateModule } from "./modules/freight_template/freight_template.module";
 import { UploadModule } from "./modules/upload/upload.module";
 import { WapModule } from "./modules/wap/wap.module";
 import { OrderModule } from "./modules/order/order.module";
@@ -37,19 +32,14 @@ import { OrderModule } from "./modules/order/order.module";
     GoodsModule,
     AdModule,
     CategoryModule,
-    ProductModule,
-    GoodsSpecificationModule,
     StoreModule,
     OrderModule,
     FreightModule,
-    GoodsGalleryModule,
     CartModule,
     CommonModule,
-    FreightTemplateModule,
     SpecificationModule,
     NoticeModule,
     ShipperModule,
-    OverviewModule,
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         type: "mysql",

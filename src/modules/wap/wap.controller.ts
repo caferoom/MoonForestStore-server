@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
-import { GoodsService } from "../goods/goods.service";
-import { CategoryService } from "../category/category.service";
-import { CartService } from "../cart/cart.service";
-import { ProductService } from "../product/product.service";
-import { GoodsSpecification } from "src/database/goods_specification.entity";
+import { GoodsService } from "../../services/goods.service";
+import { CategoryService } from "../../services/category.service";
+import { CartService } from "../../services/cart.service";
+import { ProductService } from "../../services/product.service";
+import { GoodsSpecification } from "src/entities/goods_specification.entity";
 
 @Controller("address")
 @UseGuards(AuthGuard("jwt"))

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { NoticeService } from "./notice.service";
+import { NoticeService } from "../../services/notice.service";
 import * as dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 

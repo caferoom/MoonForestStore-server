@@ -1,13 +1,13 @@
 import { Controller, Get, UseGuards, Request, Post } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { FreightTemplateService } from "./freightTemplate.service";
-import { ExceptAreaService } from "./exceptArea.service";
-import { RegionService } from "../common/region.service";
+import { FreightTemplateService } from "../../services/freightTemplate.service";
+import { ExceptAreaService } from "../../services/exceptArea.service";
+import { RegionService } from "../../services/region.service";
 import { In, Not } from "typeorm";
 import { cloneDeep } from "lodash";
-import { ExceptAreaDetailService } from "./exceptAreaDetail.service";
-import { FreightTemplateGroupService } from "./freightTemplateGroup.service";
-import { FreightTemplateDetailService } from "./freightTemplateDetail.service";
+import { ExceptAreaDetailService } from "../../services/exceptAreaDetail.service";
+import { FreightTemplateGroupService } from "../../services/freightTemplateGroup.service";
+import { FreightTemplateDetailService } from "../../services/freightTemplateDetail.service";
 
 @Controller("freight")
 @UseGuards(AuthGuard("jwt"))
@@ -34,7 +34,7 @@ export class FreightController {
     for (const item of _data) {
       const area = item.area;
       const areaData = area.split(",");
-      const info = await this.regionService.findBy({ id: In(areaData) });
+      const info = await this.regionService.repository.findBy({ id: In(areaData) });
       item.areaName = info.map((i) => i.name).join(",");
     }
 
@@ -51,7 +51,7 @@ export class FreightController {
     // let areaData = {}
     const area = data.area;
     const areaData = area.split(",");
-    const info = await this.regionService.findBy({
+    const info = await this.regionService.repository.findBy({
       id: In(areaData),
     });
     (_data as any).areaName = info.map((i) => i.name).join(",");
@@ -61,7 +61,7 @@ export class FreightController {
 
   @Post("getareadata")
   async getareadata() {
-    const all = await this.regionService.find({ where: { type: 1 } });
+    const all = await this.regionService.repository.find({ where: { type: 1 } });
     return all.map((a) => ({ id: a.id, name: a.name }));
   }
 
@@ -211,7 +211,7 @@ export class FreightController {
         (item as any).freeByNumber = false;
       }
       const areaData = area.split(",");
-      const info = await this.regionService.find({ where: { id: In(areaData) } });
+      const info = await this.regionService.repository.find({ where: { id: In(areaData) } });
 
       (item as any).areaName = info.map((i) => i.name).join(",");
     }

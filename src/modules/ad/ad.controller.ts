@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { AdService } from "./ad.service";
+import { AdService } from "../../services/ad.service";
 import * as dayjs from "dayjs";
 import { BusinessException } from "src/common/exceptions/business.exception";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
-import { GoodsService } from "./goods.service";
+import { GoodsService } from "../../services/goods.service";
 
 @Controller("ad")
 @UseGuards(AuthGuard("jwt"))

@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
-import { StoreService } from "./store.service";
+import { StoreService } from "../../services/store.service";
 import { StoreController } from "./store.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
-import { ShowSettings } from "src/database/show_settings.entity";
+import { ShowSettings } from "src/entities/show_settings.entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 @Module({

@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { ShipperService } from "./shipper.service";
-import { SettingsService } from "../settings/settings.service";
+import { ShipperService } from "../../services/shipper.service";
+import { SettingsService } from "../../services/settings.service";
+import { Like } from "typeorm";
 
 @Controller("shipper")
 @UseGuards(AuthGuard("jwt"))
@@ -90,7 +91,8 @@ export class ShipperController {
     const { page = 1, size = 10, name = "" } = req.query;
     const queryBuilder = await this.shipperService.createQueryBuilder();
     const data = await queryBuilder
-      .where("name LIKE :name OR code LIKE :name", { name: `%${name}%` })
+      // .where("name LIKE :name OR code LIKE :name", { name: `%${name}%` })
+      .where([{ name: Like(`%${name}%`) }, { code: Like(`%${name}%`) }])
       .orderBy("sort_order", "ASC")
       .skip((Number(page) - 1) * Number(size))
       .take(Number(size))

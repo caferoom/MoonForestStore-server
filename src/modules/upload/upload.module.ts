@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { QiniuService } from "./qiniu.service";
+import { QiniuService } from "../../services/qiniu.service";
 import { UploadController } from "./upload.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 import { ConfigService } from "@nestjs/config";

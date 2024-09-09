@@ -1,6 +1,6 @@
 import { Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { QiniuService } from "./qiniu.service";
+import { QiniuService } from "../../services/qiniu.service";
 import { ConfigService } from "@nestjs/config";
 
 @Controller("upload")
