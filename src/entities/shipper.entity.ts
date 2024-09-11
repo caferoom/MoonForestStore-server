@@ -7,6 +7,7 @@ export class Shipper {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // 快递公司名称 是不是可以长一些 40？
   @Column({ type: "varchar", length: 20 })
   name: string;
 
@@ -16,12 +17,14 @@ export class Shipper {
   @Column({ type: "int", default: 10 })
   sort_order: number;
 
+  // 快递公司月付编码
   @Column({ type: "varchar", length: 100, nullable: true, default: null })
   MonthCode: string;
 
   @Column({ type: "varchar", length: 100, nullable: true, default: null })
   CustomerName: string;
 
+  // 是否启用中
   @Column({ type: "tinyint", width: 1, default: 0 })
   enabled: boolean;
 }
