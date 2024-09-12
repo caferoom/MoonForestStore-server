@@ -1,8 +1,18 @@
-import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { ShipperService } from "../../services/shipper.service";
 import { SettingsService } from "../../services/settings.service";
 import { Like } from "typeorm";
+import {
+  DTO_Shipper_Remove,
+  DTO_Shipper_EnabledStatus,
+  DTO_Shipper_GetDetailInfoById,
+  DTO_Shipper_Save,
+  DTO_Shipper_UpdateSort,
+  DTO_Shipper_ChangeAutoStatus,
+  DTO_Shipper_StoreShipperSettings,
+  DTO_Shipper_List,
+} from "./dto/shipper.dto";
 
 @Controller("shipper")
 @UseGuards(AuthGuard("jwt"))
@@ -14,8 +24,8 @@ export class ShipperController {
 
   // 获取使用中的快递公司信息列表
   @Get("usingDeliveryCompanyList")
-  async shipper() {
-    const infoArray = await this.shipperService.find({
+  async usingDeliveryCompanyList() {
+    const infoArray = await this.shipperService.repository.find({
       where: {
         enabled: true,
       },
@@ -24,74 +34,62 @@ export class ShipperController {
   }
 
   // 获取目前设置的发货地址
-  @Get("getShippingAddress")
-  async getShippingAddress() {
-    const settingsArray = await this.settingsService.find({
-      where: {
-        id: 1,
-      },
-    });
-    return settingsArray[0];
+  @Get("getSenderInfo")
+  async getSenderInfo() {
+    return await this.settingsService.getSenderInfo();
   }
 
   // 设置是否自动发货
   @Post("changeAutoStatus")
-  async changeAutoStatus(@Request() req) {
-    const { status } = req.body;
-
-    await this.settingsService.edit(1, { autoDelivery: status });
-    return true;
+  async changeAutoStatus(@Body() body: DTO_Shipper_ChangeAutoStatus) {
+    const { enable } = body;
+    await this.settingsService.setAutoDelivery(enable);
   }
 
   // 保存设置的发货地址
   @Post("storeShipperSettings")
-  async storeShipperSettings(@Request() req) {
-    const { id, ...values } = req.body;
-    await this.settingsService.edit(id, values);
-    return true;
+  async storeShipperSettings(@Body() body: DTO_Shipper_StoreShipperSettings) {
+    await this.settingsService.updateSenderInfo(body);
   }
 
   // 删除候选快递公司信息
-  @Post("destory")
-  async destory(@Request() req) {
-    const { id } = req.body;
-    return await this.shipperService.remove(Number(id));
+  @Post("remove")
+  async remove(@Body() body: DTO_Shipper_Remove) {
+    const { id } = body;
+    return await this.shipperService.repository.delete(Number(id));
   }
 
   @Get("enabledStatus")
-  async enabledStatus(@Request() req) {
-    const { id, status } = req.query;
-    this.shipperService.edit(Number(id), { enabled: Boolean(status) });
-    return true;
+  async enabledStatus(@Query() query: DTO_Shipper_EnabledStatus) {
+    const { id, enable } = query;
+    await this.shipperService.repository.update(id, {
+      enabled: enable,
+    });
   }
 
-  @Get("info")
-  async info(@Request() req) {
-    const { id } = req.query;
-
-    const model = await this.shipperService.findOneById(id);
-
-    return model;
+  @Get("getDetailInfoById")
+  async getDetailInfoById(@Query() query: DTO_Shipper_GetDetailInfoById) {
+    const { id } = query;
+    return await this.shipperService.repository.findOneById(id);
   }
 
-  @Post("store")
-  async store(@Request() req) {
-    const { id, ...values } = req.body;
+  @Post("save")
+  async save(@Body() body: DTO_Shipper_Save) {
+    const { id, ...values } = body;
 
     if (id > 0) {
-      await this.shipperService.edit(id, values);
+      await this.shipperService.repository.update(id, values);
       return { id, ...values };
     } else {
-      const v = await this.shipperService.add(values);
-      return v;
+      return await this.shipperService.repository.save(values);
     }
   }
+
   @Get("list")
-  async list(@Request() req) {
-    const { page = 1, size = 10, name = "" } = req.query;
-    const queryBuilder = await this.shipperService.createQueryBuilder();
+  async list(@Query() query: DTO_Shipper_List) {
+    const { page = 1, size = 10, name = "" } = query;
+    const queryBuilder = await this.shipperService.repository.createQueryBuilder();
     const data = await queryBuilder
-      // .where("name LIKE :name OR code LIKE :name", { name: `%${name}%` })
       .where([{ name: Like(`%${name}%`) }, { code: Like(`%${name}%`) }])
       .orderBy("sort_order", "ASC")
       .skip((Number(page) - 1) * Number(size))
@@ -103,19 +101,10 @@ export class ShipperController {
       currentPage: page,
     };
   }
-  @Post("updateSort")
-  async updateSort(@Request() req) {
-    const { id, sort } = req.body;
-    return await this.shipperService.edit(id, { sort_order: sort });
-  }
 
-  @Get("delivery")
-  async indexAction() {
-    const data = await this.shipperService.find({
-      where: {
-        enabled: true,
-      },
-    });
-    return data;
+  @Post("updateSort")
+  async updateSort(@Body() body: DTO_Shipper_UpdateSort) {
+    const { id, sort } = body;
+    return await this.shipperService.repository.update(id, { sort_order: sort });
   }
 }

@@ -61,4 +61,8 @@ export class RegionService {
 
     return `${province_name}${city_name}${district_name}${detailAddress || ""}`;
   }
+
+  async getAllProvinces() {
+    return await this.regionRepository.find({ where: { type: 1 } });
+  }
 }

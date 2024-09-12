@@ -132,8 +132,7 @@ export class OrderController {
 
   @Get("getAutoStatus")
   async getAutoStatusAction() {
-    const info = await this.settingsService.findOneById(1);
-    return info.autoDelivery;
+    return await this.settingsService.getAutoDelivery();
   }
   // async toDeliveryAction() {
   //     const page = this.get('page') || 1;

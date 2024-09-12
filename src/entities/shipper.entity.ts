@@ -1,4 +1,3 @@
-import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 //快递公司列表
@@ -11,9 +10,11 @@ export class Shipper {
   @Column({ type: "varchar", length: 20 })
   name: string;
 
+  // 看不出来，好像是使用这个作为唯一标识来关联其他表？？？？
   @Column({ type: "varchar", length: 10 })
   code: string;
 
+  // 排序用
   @Column({ type: "int", default: 10 })
   sort_order: number;
 
@@ -21,6 +22,7 @@ export class Shipper {
   @Column({ type: "varchar", length: 100, nullable: true, default: null })
   MonthCode: string;
 
+  // 不知道这个干嘛的，看代码上注释好像是圆通需要|打印电子面单需要？？？可能需要再确认下 todo
   @Column({ type: "varchar", length: 100, nullable: true, default: null })
   CustomerName: string;
 
@@ -28,11 +30,3 @@ export class Shipper {
   @Column({ type: "tinyint", width: 1, default: 0 })
   enabled: boolean;
 }
-
-export type IShipperCreateMembers = TypeCreateMembers<
-  Shipper,
-  "enabled" | "sort_order" | "MonthCode" | "CustomerName",
-  "id"
->;
-
-export type IShipperUpdateMembers = TypeUpdateMembers<Shipper, "id">;

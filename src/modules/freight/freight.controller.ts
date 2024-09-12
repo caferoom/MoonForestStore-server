@@ -59,10 +59,10 @@ export class FreightController {
     return _data;
   }
 
-  @Post("getareadata")
-  async getareadata() {
-    const all = await this.regionService.repository.find({ where: { type: 1 } });
-    return all.map((a) => ({ id: a.id, name: a.name }));
+  @Post("getAllProvinces")
+  async getAllProvinces() {
+    const provinces = await this.regionService.getAllProvinces();
+    return provinces.map((a) => ({ id: a.id, name: a.name }));
   }
 
   @Post("addExceptArea")
@@ -87,6 +87,7 @@ export class FreightController {
   @Post("saveExceptArea")
   async saveExceptAreaAction(@Request() req) {
     const { table, info } = req.body;
+    console.log("*", table, info);
     const data = {
       area: table[0].area,
       content: info.content,

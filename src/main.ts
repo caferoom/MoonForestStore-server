@@ -29,7 +29,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // 自动转换类型
-      // whitelist: true, // 自动移除不在 DTO 中定义的属性
+      whitelist: true, // 自动移除不在 DTO 中定义的属性
     }),
   );
 
