@@ -1,6 +1,7 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
+// 目前用来处理小程序端的搜索历史，TODO，等到做小程序端处理
 @Entity()
 export class SearchHistory {
   @PrimaryGeneratedColumn({ type: "int", unsigned: true })

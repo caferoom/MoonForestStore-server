@@ -1,6 +1,6 @@
-import { Controller, Get, UseGuards, Request, Post } from "@nestjs/common";
+import { Controller, Get, UseGuards, Request, Post, Query, Body } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { UsersService } from "../../services/users.service";
+import { UserService } from "../../services/users.service";
 import * as dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
@@ -13,12 +13,13 @@ import { OrderService } from "../../services/order.service";
 import { AddressService } from "../../services/address.service";
 import * as Express from "express";
 import { FootprintService } from "../../services/footprint.service";
+import { DTO_User_List } from "./dto/user.dto";
 
 @Controller("user")
 @UseGuards(AuthGuard("jwt"))
 export class UsersController {
   constructor(
-    private usersService: UsersService,
+    private userService: UserService,
     private cartService: CartService,
     private orderService: OrderService,
     private orderGoodsService: OrderGoodsService,
@@ -27,13 +28,36 @@ export class UsersController {
     private footPrintService: FootprintService,
   ) {}
 
+  @Post("list")
+  async ind(@Body() body: DTO_User_List) {
+    const { page, size, sortField, sortType, filters } = body;
+    const { total, data } = await this.userService.getUserList({
+      page,
+      pageSize: size,
+      sortField,
+      filters,
+      sortType,
+    });
+
+    return {
+      total,
+      data,
+      currentPage: page,
+    };
+  }
+
+  @Post("accountEnable")
+  async accountEnable(@Body() body) {
+    const { id, enable } = body;
+    return await this.userService.accountEnable(id, enable);
+  }
+
   @Get("")
   async indexAction(@Request() req) {
     const { page = 1, size = 10, nickname = "" } = req.query;
     const buffer = Buffer.from(nickname);
     const nick = buffer.toString("base64");
-
-    const queryBuilder = await this.usersService.createQueryBuilder("user");
+    const queryBuilder = await this.userService.repository.createQueryBuilder("user");
 
     const [data, total] = await queryBuilder
       .where("user.nickname LIKE :nickname", { nickname: `%${nick}%` })
@@ -62,7 +86,7 @@ export class UsersController {
   @Get("info")
   async infoAction(@Request() req) {
     const { id } = req.query;
-    const info = await this.usersService.findOneById(id);
+    const info = await this.userService.repository.findOneById(id);
     if (info) {
       const cloned = cloneDeep(info);
       (cloned as any).register_time = dayjs(cloned.register_time * 1000).format(
@@ -182,7 +206,7 @@ export class UsersController {
   async addressAction(@Request() req) {
     const { id, page = 1, size = 10 } = req.query;
 
-    const [_data, total] = await this.addressService.findAndCount({
+    const [_data, total] = await this.addressService.repository.findAndCount({
       where: { user_id: id },
       skip: (page - 1) * size,
       take: size,
@@ -216,7 +240,7 @@ export class UsersController {
       district_id: district,
       city_id: city,
     };
-    await this.addressService.update(
+    await this.addressService.repository.update(
       {
         user_id: user_id,
         id: id,
@@ -279,7 +303,7 @@ export class UsersController {
 
     const buffer = Buffer.from(nickname);
     const _nickname = buffer.toString("base64");
-    const model = await this.usersService.update(
+    const model = await this.userService.repository.update(
       {
         id: id,
       },
@@ -293,7 +317,7 @@ export class UsersController {
   @Post("destory")
   async destoryAction(@Request() req: Express.Request) {
     const { id } = req.body;
-    await this.usersService.remove(id);
+    await this.userService.repository.remove(id);
     return true;
   }
 
@@ -301,7 +325,7 @@ export class UsersController {
   async updateMobileAction(@Request() req: Express.Request) {
     const { id, mobile } = req.body;
 
-    await this.usersService.update(
+    await this.userService.repository.update(
       {
         id: id,
       },
@@ -309,21 +333,21 @@ export class UsersController {
         mobile: mobile,
       },
     );
-    const data = await this.usersService.findOneById(id);
+    const data = await this.userService.repository.findOneById(id);
 
     return data;
   }
 
-  @Post("updateName")
-  async updateNameAction(@Request() req: Express.Request) {
-    const { id, name } = req.body;
+  // @Post("updateName")
+  // async updateNameAction(@Request() req: Express.Request) {
+  //   const { id, name } = req.body;
 
-    await this.usersService.update({ id: id }, { name: name });
+  //   await this.userService.repository.update({ id: id }, { name: name });
 
-    const data = await this.usersService.findOneById(id);
+  //   const data = await this.userService.repository.findOneById(id);
 
-    return data;
-  }
+  //   return data;
+  // }
 
   @Get("shopcart")
   async indesxAction(@Request() req: Express.Request) {
@@ -344,7 +368,7 @@ export class UsersController {
 
     for (const item of data) {
       (item as any).add_time = dayjs(item.add_time).format("YYYY-MM-DD HH:mm:ss");
-      const userInfo = await this.usersService.findOneById(item.user_id);
+      const userInfo = await this.userService.repository.findOneById(item.user_id);
 
       if (userInfo) {
         (item as any).nickname = Buffer.from(userInfo.nickname, "base64").toString();

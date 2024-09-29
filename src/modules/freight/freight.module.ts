@@ -9,7 +9,6 @@ import { ExceptAreaService } from "../../services/exceptArea.service";
 import { Region } from "src/entities/region.entity";
 import { RegionService } from "../../services/region.service";
 import { ExceptAreaDetail } from "src/entities/except_area_detail.entity";
-import { ExceptAreaDetailService } from "../../services/exceptAreaDetail.service";
 import { FreightTemplateDetail } from "src/entities/freight_template_detail.entity";
 import { FreightTemplateGroup } from "src/entities/freight_template_group.entity";
 import { FreightTemplateGroupService } from "../../services/freightTemplateGroup.service";
@@ -32,7 +31,6 @@ import { FreightTemplateDetailService } from "../../services/freightTemplateDeta
     FreightTemplateDetailService,
     ExceptAreaService,
     RegionService,
-    ExceptAreaDetailService,
     JwtStrategy,
   ],
   controllers: [FreightController],
@@ -40,7 +38,6 @@ import { FreightTemplateDetailService } from "../../services/freightTemplateDeta
     FreightTemplateService,
     ExceptAreaService,
     RegionService,
-    ExceptAreaDetailService,
     FreightTemplateGroupService,
     FreightTemplateDetailService,
   ],

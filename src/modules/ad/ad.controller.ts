@@ -110,7 +110,7 @@ export class AdController {
   @Post("getallrelate")
   async getallrelateAction() {
     const data = await this.goodsService.find({
-      where: { is_on_sale: 1, is_delete: false },
+      where: { is_on_sale: true, is_delete: false },
     });
 
     return data.map((d) => {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
 import { GoodsService } from "../../services/goods.service";
@@ -13,6 +13,7 @@ import { GoodsGalleryService } from "../../services/goodsGallery.service";
 import { FreightTemplateService } from "../../services/freight_template.service";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";
 import { BusinessException } from "src/common/exceptions/business.exception";
+import { DTO_Goods_All, DTO_Goods_SaleStatus } from "./dto/goods.dto";
 
 @Controller("goods")
 @UseGuards(AuthGuard("jwt"))
@@ -76,7 +77,7 @@ export class GoodsController {
     const _data = await this.goodsService.findOneById(goodsId);
     const data = cloneDeep(_data);
     delete data.id;
-    data.is_on_sale = 0;
+    data.is_on_sale = false;
 
     const newAddGood = await this.goodsService.add(data);
     // const insertId = await this.model("goods").add(data);
@@ -105,7 +106,7 @@ export class GoodsController {
     const all_goods = await this.goodsService.find({
       where: {
         is_delete: false,
-        is_on_sale: 1,
+        is_on_sale: true,
       },
     });
 
@@ -131,43 +132,24 @@ export class GoodsController {
     return true;
   }
 
-  @Get("")
-  async indexAction(@Request() req: Express.Request) {
-    const { page = 1, size, name = "" } = req.query;
-    const [_data, count] = await this.goodsService.findAndCount({
+  @Get("all")
+  async all(@Query() query: DTO_Goods_All) {
+    const { page = 1, size = 10, name = "" } = query;
+    const [data, count] = await this.goodsService.findAndCount({
       where: {
         name: ILike(`%${name}%`),
         is_delete: false,
       },
       order: { sort_order: "ASC" },
-      skip: (Number(page) - 1) * Number(size),
-      take: Number(size),
+      skip: (page - 1) * size,
+      take: size,
     });
 
-    const data = cloneDeep(_data);
-
     for (const item of data) {
-      const info = await this.categoryService.findOneById(item.category_id);
-
-      (item as any).category_name = info?.name;
-      if (item.is_on_sale == 1) {
-        (item as any).is_on_sale = true;
-      } else {
-        (item as any).is_on_sale = false;
-      }
-      if (item.is_index == 1) {
-        (item as any).is_index = true;
-      } else {
-        (item as any).is_index = false;
-      }
-      const _product = await this.productService.find({
-        where: {
-          goods_id: item.id,
-          is_delete: false,
-        },
+      const product = await this.productService.findBy({
+        goods_id: item.id,
+        is_delete: false,
       });
-
-      const product = cloneDeep(_product);
 
       for (const ele of product) {
         const spec = await this.goodsSpecificationService.findOne({
@@ -178,7 +160,7 @@ export class GoodsController {
         });
 
         (ele as any).value = spec.value;
-        (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
+        (ele as any).is_on_sale = ele.is_on_sale;
       }
       (item as any).product = product;
     }
@@ -189,174 +171,14 @@ export class GoodsController {
     };
   }
 
-  @Get("sort")
-  async sortAction(@Request() req: Express.Request) {
-    const { page = 1, size, index } = req.query;
-
-    if (Number(index) == 1) {
-      const [data1, count] = await this.goodsService.findAndCount({
-        where: { is_delete: false },
-        order: {
-          sell_volume: "DESC",
-        },
-        skip: (Number(page) - 1) * Number(size),
-        take: Number(size),
-      });
-
-      const data = cloneDeep(data1);
-      for (const item of data) {
-        const info = await this.categoryService.findOneById(item.category_id);
-
-        (item as any).category_name = info.name;
-        if (item.is_on_sale == 1) {
-          (item as any).is_on_sale = true;
-        } else {
-          (item as any).is_on_sale = false;
-        }
-        if (item.is_index == 1) {
-          (item as any).is_index = true;
-        } else {
-          (item as any).is_index = false;
-        }
-        const _product = await this.productService.find({
-          where: {
-            goods_id: item.id,
-            is_delete: false,
-          },
-        });
-
-        const product = cloneDeep(_product);
-        for (const ele of product) {
-          const _sepc = await this.goodsSpecificationService.findOne({
-            where: {
-              id: Number(ele.goods_specification_ids),
-              is_delete: false,
-            },
-          });
-
-          (ele as any).value = _sepc.value;
-          (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
-        }
-        (item as any).product = product;
-      }
-      return {
-        count,
-        data,
-        currentPage: page,
-      };
-    } else if (Number(index) == 2) {
-      const [_data, count] = await this.goodsService.findAndCount({
-        where: { is_delete: false },
-        order: {
-          retail_price: "DESC",
-        },
-        skip: (Number(page) - 1) * Number(size),
-        take: Number(size),
-      });
-
-      const data = cloneDeep(_data);
-      for (const item of data) {
-        const info = await this.categoryService.findOneById(item.category_id);
-        (item as any).category_name = info?.name;
-        if (!info) {
-          console.log("这里逻辑上不是不应该没有info?");
-        }
-        if (item.is_on_sale == 1) {
-          (item as any).is_on_sale = true;
-        } else {
-          (item as any).is_on_sale = false;
-        }
-        if (item.is_index == 1) {
-          (item as any).is_index = true;
-        } else {
-          (item as any).is_index = false;
-        }
-        const _product = await this.productService.find({
-          where: {
-            goods_id: item.id,
-            is_delete: false,
-          },
-        });
-
-        const product = cloneDeep(_product);
-        for (const ele of product) {
-          const spec = await this.goodsSpecificationService.findOne({
-            where: {
-              id: Number(ele.goods_specification_ids),
-              is_delete: false,
-            },
-          });
-
-          (ele as any).value = spec.value;
-          (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
-        }
-        (item as any).product = product;
-      }
-      return {
-        data,
-        count,
-        currentPage: page,
-      };
-    } else if (Number(index) == 3) {
-      const [_data, count] = await this.goodsService.findAndCount({
-        where: {
-          is_delete: false,
-        },
-        order: { goods_number: "DESC" },
-        skip: (Number(page) - 1) * Number(size),
-        take: Number(size),
-      });
-
-      const data = cloneDeep(_data);
-      for (const item of data) {
-        const info = await this.categoryService.findOneById(item.category_id);
-
-        (item as any).category_name = info.name;
-        if (item.is_on_sale == 1) {
-          (item as any).is_on_sale = true;
-        } else {
-          (item as any).is_on_sale = false;
-        }
-        if (item.is_index == 1) {
-          (item as any).is_index = true;
-        } else {
-          (item as any).is_index = false;
-        }
-        const product = await this.productService.find({
-          where: {
-            goods_id: item.id,
-            is_delete: false,
-          },
-        });
-
-        for (const ele of product) {
-          const spec = await this.goodsSpecificationService.findOne({
-            where: {
-              id: Number(ele.goods_specification_ids),
-              is_delete: false,
-            },
-          });
-          (ele as any).value = spec.value;
-          (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
-        }
-        (item as any).product = product;
-      }
-      return {
-        currentPage: page,
-        data,
-        count,
-      };
-    }
-  }
-
   @Get("onsale")
   async onsaleAction(@Request() req: Express.Request) {
-    const { page = 1, size } = req.query;
+    const { page = 1, size = 10 } = req.query;
 
     const [_data, count] = await this.goodsService.findAndCount({
       where: {
         is_delete: false,
-        is_on_sale: 1,
+        is_on_sale: true,
       },
       order: {
         sort_order: "asc",
@@ -368,26 +190,26 @@ export class GoodsController {
     const data = cloneDeep(_data);
 
     for (const item of data) {
-      const info = await this.categoryService.findOneById(item.category_id);
+      // const info = await this.categoryService.findOneById(item.category_id);
 
-      if (!info) {
-        console.log("这里逻辑上不是不应该没有info?");
-      }
-      (item as any).category_name = info?.name;
+      // if (!info) {
+      //   console.log("这里逻辑上不是不应该没有info?");
+      // }
+      // (item as any).category_name = info?.name;
       // if (info.parent_id != 0) {
       //     const parentInfo = await this.model('category').where({id: info.parent_id}).find();
       //     item.category_p_name = parentInfo.name;
       // }
-      if (item.is_on_sale == 1) {
-        (item as any).is_on_sale = true;
-      } else {
-        (item as any).is_on_sale = false;
-      }
-      if (item.is_index == 1) {
-        (item as any).is_index = true;
-      } else {
-        (item as any).is_index = false;
-      }
+      // if (item.is_on_sale == 1) {
+      //   (item as any).is_on_sale = true;
+      // } else {
+      //   (item as any).is_on_sale = false;
+      // }
+      // if (item.is_index == 1) {
+      //   (item as any).is_index = true;
+      // } else {
+      //   (item as any).is_index = false;
+      // }
       const product = await this.productService.find({
         where: {
           goods_id: item.id,
@@ -404,7 +226,7 @@ export class GoodsController {
         });
 
         (ele as any).value = spec.value;
-        (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
+        // (ele as any).is_on_sale = ele.is_on_sale ? "1" : "0";
       }
       (item as any).product = product;
     }
@@ -437,16 +259,16 @@ export class GoodsController {
       const info = await this.categoryService.findOneById(item.category_id);
 
       (item as any).category_name = info.name;
-      if (item.is_on_sale == 1) {
-        (item as any).is_on_sale = true;
-      } else {
-        (item as any).is_on_sale = false;
-      }
-      if (item.is_index == 1) {
-        (item as any).is_index = true;
-      } else {
-        (item as any).is_index = false;
-      }
+      // if (item.is_on_sale == 1) {
+      //   (item as any).is_on_sale = true;
+      // } else {
+      //   (item as any).is_on_sale = false;
+      // }
+      // if (item.is_index == 1) {
+      //   (item as any).is_index = true;
+      // } else {
+      //   (item as any).is_index = false;
+      // }
 
       const product = await this.productService.find({
         where: {
@@ -481,7 +303,7 @@ export class GoodsController {
     const [_data, count] = await this.goodsService.findAndCount({
       where: {
         is_delete: false,
-        is_on_sale: 0,
+        is_on_sale: false,
       },
       order: { id: "DESC" },
       skip: Number(size) * (Number(page) - 1),
@@ -493,16 +315,16 @@ export class GoodsController {
       const info = await this.categoryService.findOneById(item.category_id);
 
       (item as any).category_name = info.name;
-      if (item.is_on_sale == 1) {
-        (item as any).is_on_sale = true;
-      } else {
-        (item as any).is_on_sale = false;
-      }
-      if (item.is_index == 1) {
-        (item as any).is_index = true;
-      } else {
-        (item as any).is_index = false;
-      }
+      // if (item.is_on_sale == 1) {
+      //   (item as any).is_on_sale = true;
+      // } else {
+      //   (item as any).is_on_sale = false;
+      // }
+      // if (item.is_index == 1) {
+      //   (item as any).is_index = true;
+      // } else {
+      //   (item as any).is_index = false;
+      // }
 
       const product = await this.productService.find({
         where: {
@@ -531,19 +353,11 @@ export class GoodsController {
   }
 
   @Get("saleStatus")
-  async saleStatusAction(@Request() req: Express.Request) {
-    const { id, status } = req.query;
+  async saleStatusAction(@Query() query: DTO_Goods_SaleStatus) {
+    const { id, status } = query;
 
-    let sale = 0;
-    if (status == "true") {
-      sale = 1;
-    }
-
-    await this.goodsService.update({ id: Number(id) }, { is_on_sale: sale });
-    await this.cartService.update(
-      { goods_id: Number(id) },
-      { is_on_sale: sale === 1, checked: sale },
-    );
+    await this.goodsService.update({ id: id }, { is_on_sale: status });
+    await this.cartService.update({ goods_id: id }, { is_on_sale: status, checked: status });
 
     return true;
   }
@@ -573,20 +387,15 @@ export class GoodsController {
   }
 
   @Get("indexShowStatus")
-  async indexShowStatusAction(@Request() req: Express.Request) {
-    const { id, status } = req.query;
-
-    let stat = 0;
-    if (status == "true") {
-      stat = 1;
-    }
+  async indexShowStatusAction(@Query() query: DTO_Goods_SaleStatus) {
+    const { id, status } = query;
 
     await this.goodsService.update(
       {
-        id: Number(id),
+        id: id,
       },
       {
-        is_index: stat,
+        is_index: status,
       },
     );
   }

@@ -1,6 +1,6 @@
-import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+// 偏远地区表，每一条记录代表一种设置（如果有的设置将内蒙古设置为偏远地区，有的没有）
 @Entity()
 export class ExceptArea {
   @PrimaryGeneratedColumn({ type: "mediumint", unsigned: true })
@@ -15,11 +15,3 @@ export class ExceptArea {
   @Column({ type: "tinyint", width: 1, default: 0 })
   is_delete: boolean;
 }
-
-export type IExceptAreaCreateMembers = TypeCreateMembers<
-  ExceptArea,
-  "content" | "area" | "is_delete",
-  "id"
->;
-
-export type IExceptAreaUpdateMembers = TypeUpdateMembers<ExceptArea, "id">;

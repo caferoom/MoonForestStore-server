@@ -13,6 +13,7 @@ export class GoodsSpecification {
   @Column({ type: "int", unsigned: true, default: 0 })
   specification_id: number;
 
+  // 型号/规格，如1kg/条
   @Column({ type: "varchar", length: 50 })
   value: string;
 

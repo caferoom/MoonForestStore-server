@@ -11,7 +11,7 @@ async function bootstrap() {
 
   // 跨域处理
   app.enableCors({
-    origin: "http://localhost:9528",
+    origin: "http://localhost:6001",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true, // 允许携带凭证
   });

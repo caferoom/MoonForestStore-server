@@ -9,7 +9,7 @@ import { SettingsService } from "../../services/settings.service";
 import { Region } from "src/entities/region.entity";
 import { RegionService } from "../../services/region.service";
 import { User } from "src/entities/user.entity";
-import { UsersService } from "../../services/users.service";
+import { UserService } from "../../services/users.service";
 import { OrderGoods } from "src/entities/order_goods.entity";
 import { OrderGoodsService } from "../../services/order_goods.service";
 import { OrderExpress } from "src/entities/order_express.entity";
@@ -20,7 +20,7 @@ import { OrderExpressService } from "../../services/order_express.service";
   providers: [
     OrderService,
     SettingsService,
-    UsersService,
+    UserService,
     RegionService,
     OrderGoodsService,
     OrderExpressService,

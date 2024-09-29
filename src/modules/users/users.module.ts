@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { UsersService } from "../../services/users.service";
+import { UserService } from "../../services/users.service";
 import { UsersController } from "./users.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 import { User } from "src/entities/user.entity";
@@ -20,7 +20,7 @@ import { FootPrint } from "src/entities/footprint.entity";
 @Module({
   imports: [TypeOrmModule.forFeature([User, Cart, Order, OrderGoods, FootPrint, Address, Region])],
   providers: [
-    UsersService,
+    UserService,
     FootprintService,
     CartService,
     OrderService,
@@ -30,6 +30,6 @@ import { FootPrint } from "src/entities/footprint.entity";
     JwtStrategy,
   ],
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [UserService],
 })
 export class UsersModule {}

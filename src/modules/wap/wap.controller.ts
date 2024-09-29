@@ -71,7 +71,7 @@ export class WapController {
 
     const goods = await this.goodsService.find({
       where: {
-        is_on_sale: 1,
+        is_on_sale: true,
         is_delete: false,
       },
     });
@@ -203,7 +203,7 @@ export class WapController {
     const [data, count] = await this.goodsService.findAndCount({
       where: {
         is_delete: false,
-        is_on_sale: 0,
+        is_on_sale: false,
       },
       order: {
         id: "DESC",
@@ -221,11 +221,11 @@ export class WapController {
 
         (item as any).category_p_name = parentInfo.name;
       }
-      if (item.is_on_sale == 1) {
-        (item as any).is_on_sale = true;
-      } else {
-        (item as any).is_on_sale = false;
-      }
+      // if (item.is_on_sale == 1) {
+      //   (item as any).is_on_sale = true;
+      // } else {
+      //   (item as any).is_on_sale = false;
+      // }
     }
     return {
       currentPage: page,

@@ -1,20 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { BaseService } from "src/common/base.service";
-import { IAddressCreateMembers, IAddressUpdateMembers, Address } from "src/entities/address.entity";
+import { Address } from "src/entities/address.entity";
 
 import { Repository } from "typeorm";
 
 @Injectable()
-export class AddressService extends BaseService<
-  Address,
-  IAddressCreateMembers,
-  IAddressUpdateMembers
-> {
+export class AddressService {
+  public repository: Repository<Address>;
+
   constructor(
     @InjectRepository(Address)
-    private address: Repository<Address>,
+    private addressRepository: Repository<Address>,
   ) {
-    super(address);
+    this.repository = addressRepository;
   }
 }

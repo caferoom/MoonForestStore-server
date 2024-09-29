@@ -7,14 +7,14 @@ import { SettingsService } from "../../services/settings.service";
 import { OrderExpressService } from "../../services/order_express.service";
 import { RegionService } from "../../services/region.service";
 import * as dayjs from "dayjs";
-import { UsersService } from "../../services/users.service";
+import { UserService } from "../../services/users.service";
 import { OrderGoodsService } from "../../services/order_goods.service";
 
 @UseGuards(AuthGuard("jwt"))
 @Controller("order")
 export class OrderController {
   constructor(
-    private usersService: UsersService,
+    private userService: UserService,
     private regionService: RegionService,
     private orderService: OrderService,
     private orderGoodsService: OrderGoodsService,
@@ -89,11 +89,12 @@ export class OrderController {
       item.goodsList.forEach((v) => {
         item.goodsCount += v.number;
       });
-      const user = await this.usersService.findOne({
+      const user = await this.userService.repository.findOne({
         where: {
           id: item.user_id,
         },
-        select: ["nickname", "name", "mobile", "avatar"],
+        select: ["nickname", "mobile", "avatar"],
+        // select: ["nickname", "name", "mobile", "avatar"],
       });
 
       if (user) {

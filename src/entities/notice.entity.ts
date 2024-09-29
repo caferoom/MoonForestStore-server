@@ -6,9 +6,11 @@ export class Notice {
   @PrimaryGeneratedColumn({ type: "smallint", unsigned: true })
   id: number;
 
+  // 公告的文案
   @Column({ type: "varchar", length: 255, default: 0 })
-  content: number;
+  content: string;
 
+  // 时间戳，公告结束时间，感觉还是加一个启动时间比较好,
   @Column({ type: "int", default: 0 })
   end_time: number;
 

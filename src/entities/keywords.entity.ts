@@ -1,6 +1,7 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+// todo 也是只有小程序那边调用。等那边处理看
 @Entity()
 export class Keywords {
   @PrimaryGeneratedColumn({ type: "int" })

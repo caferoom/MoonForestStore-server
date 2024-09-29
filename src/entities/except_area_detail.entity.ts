@@ -1,6 +1,7 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+// 这个表好像没用，可以直接删除
 @Entity()
 export class ExceptAreaDetail {
   @PrimaryGeneratedColumn({ type: "mediumint", unsigned: true })

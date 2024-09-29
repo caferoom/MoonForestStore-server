@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { NoticeService } from "../../services/notice.service";
 import * as dayjs from "dayjs";
@@ -23,8 +23,7 @@ export class NoticeController {
   @Post("updateContent")
   async updateContentAction(@Request() req) {
     const { id, content } = req.body;
-    const data = await this.noticeService.update({ id: id }, { content: content });
-    return data;
+    return await this.noticeService.update({ id: id }, { content: content });
   }
 
   @Post("add")
@@ -63,9 +62,7 @@ export class NoticeController {
   }
 
   @Post("destory")
-  async destoryAction(@Request() req) {
-    const { id } = req.body;
-    await this.noticeService.remove(id);
-    return true;
+  async destory(@Body() body) {
+    return await this.noticeService.remove(body.id);
   }
 }

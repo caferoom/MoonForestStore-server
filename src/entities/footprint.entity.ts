@@ -2,6 +2,7 @@ import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Goods } from "./goods.entity";
 
+// 用户的浏览足迹 todo 等小程序再看
 @Entity()
 export class FootPrint {
   @PrimaryGeneratedColumn({ type: "int" })

@@ -1,13 +1,20 @@
-import { Controller, Get, UseGuards, Request, Post } from "@nestjs/common";
+import { Controller, Get, UseGuards, Post, Body } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { FreightTemplateService } from "../../services/freightTemplate.service";
 import { ExceptAreaService } from "../../services/exceptArea.service";
 import { RegionService } from "../../services/region.service";
 import { In, Not } from "typeorm";
 import { cloneDeep } from "lodash";
-import { ExceptAreaDetailService } from "../../services/exceptAreaDetail.service";
 import { FreightTemplateGroupService } from "../../services/freightTemplateGroup.service";
 import { FreightTemplateDetailService } from "../../services/freightTemplateDetail.service";
+import {
+  DTO_Freight_AddExceptArea,
+  DTO_Freight_AddTable,
+  DTO_Freight_ExceptAreaDelete,
+  DTO_Freight_ExceptAreaDetail,
+  DTO_Freight_Remove,
+  DTO_Freight_SaveExceptArea,
+} from "./dto/freight.dto";
 
 @Controller("freight")
 @UseGuards(AuthGuard("jwt"))
@@ -18,45 +25,50 @@ export class FreightController {
     private freightTemplateDetailService: FreightTemplateDetailService,
     private exceptAreaService: ExceptAreaService,
     private regionService: RegionService,
-    private exceptAreaDetailService: ExceptAreaDetailService,
   ) {}
 
-  @Get("freight")
+  @Get("getAll")
   async freight() {
-    const data = await this.freightTemplateService.find({ where: { is_delete: false } });
-    return data;
+    return await this.freightTemplateService.find({ where: { is_delete: false } });
   }
 
   @Get("exceptArea")
   async exceptAreaAction() {
-    const data = await this.exceptAreaService.find({ where: { is_delete: false } });
-    const _data: any[] = cloneDeep(data);
-    for (const item of _data) {
+    const data = await this.exceptAreaService.repository.find({ where: { is_delete: false } });
+
+    const result: { areaName: string; content: string; id: number; area: string }[] = [];
+
+    for (const item of data) {
       const area = item.area;
       const areaData = area.split(",");
       const info = await this.regionService.repository.findBy({ id: In(areaData) });
-      item.areaName = info.map((i) => i.name).join(",");
+      result.push({
+        areaName: info.map((i) => i.name).join(","),
+        content: item.content,
+        area: item.area,
+        id: item.id,
+      });
     }
 
-    return _data;
+    return result;
   }
 
   @Post("exceptAreaDetail")
-  async exceptAreaDetailAction(@Request() req) {
-    console.log("exceptAreaDetail start");
-
-    const { id } = req.body;
-    const data = await this.exceptAreaService.findOneById(id);
-    const _data = cloneDeep(data);
-    // let areaData = {}
+  async exceptAreaDetail(@Body() body: DTO_Freight_ExceptAreaDetail) {
+    const { id } = body;
+    const data = await this.exceptAreaService.repository.findOneById(id);
     const area = data.area;
     const areaData = area.split(",");
     const info = await this.regionService.repository.findBy({
       id: In(areaData),
     });
-    (_data as any).areaName = info.map((i) => i.name).join(",");
-    console.log("exceptAreaDetail end");
-    return _data;
+
+    return {
+      areaName: info.map((i) => i.name).join(","),
+      content: data.content,
+      id: data.id,
+      area: data.area,
+    } as { areaName: string; content: string; id: number; area: string };
   }
 
   @Post("getAllProvinces")
@@ -66,77 +78,32 @@ export class FreightController {
   }
 
   @Post("addExceptArea")
-  async addExceptAreaAction(@Request() req) {
-    const { table, info } = req.body;
-    const data = {
-      area: table[0].area.substring(2),
-      content: info.content,
-    };
-    const d = await this.exceptAreaService.add(data);
-    const area = table[0].area.substring(2);
-    const arr = area.split(",");
-    for (const item of arr) {
-      await this.exceptAreaDetailService.add({
-        except_area_id: d.id,
-        area: item,
-      });
-    }
-    return true;
+  async addExceptAreaAction(@Body() body: DTO_Freight_AddExceptArea) {
+    return await this.exceptAreaService.repository.save({
+      area: body.area,
+      content: body.content,
+    });
   }
 
   @Post("saveExceptArea")
-  async saveExceptAreaAction(@Request() req) {
-    const { table, info } = req.body;
-    console.log("*", table, info);
-    const data = {
-      area: table[0].area,
-      content: info.content,
-    };
-    await this.exceptAreaService.edit(info.id, data);
-
-    const area = table[0].area;
-    const arr = area.split(",").map(Number);
-    await this.exceptAreaDetailService.update(
-      {
-        area: Not(In(arr)),
-        except_area_id: info.id,
-        is_delete: false,
-      },
-      { is_delete: true },
-    );
-
-    for (const item of arr) {
-      const e = await this.exceptAreaDetailService.find({
-        where: {
-          except_area_id: info.id,
-          area: item,
-          is_delete: false,
-        },
-      });
-      if (e.length === 0) {
-        await this.exceptAreaDetailService.add({
-          except_area_id: info.id,
-          area: item,
-        });
-      }
-    }
-    return true;
+  async saveExceptAreaAction(@Body() body: DTO_Freight_SaveExceptArea) {
+    const { area, content, id } = body;
+    return await this.exceptAreaService.repository.update(id, {
+      area: area,
+      content: content,
+    });
   }
 
   @Post("exceptAreaDelete")
-  async exceptAreaDelete(@Request() req) {
-    const { id } = req.body;
-    await this.exceptAreaService.edit(Number(id), { is_delete: true });
-
-    await this.exceptAreaDetailService.update({ except_area_id: id }, { is_delete: true });
-
-    return true;
+  async exceptAreaDelete(@Body() body: DTO_Freight_ExceptAreaDelete) {
+    const { id } = body;
+    await this.exceptAreaService.repository.update(id, { is_delete: true });
   }
 
   @Post("addTable")
-  async addTableAction(@Request() req) {
-    const { info, table: data, defaultData: def } = req.body;
-    // return false;
+  async addTableAction(@Body() body: DTO_Freight_AddTable) {
+    const { info, table: data, defaultData: def } = body;
+
     const temp = await this.freightTemplateService.add(info);
 
     if (temp) {
@@ -162,7 +129,7 @@ export class FreightController {
 
       if (data.length > 0) {
         for (const item of data) {
-          const area = item.area.substring(2);
+          const area = item.area;
           const template_id = temp.id;
           const info = {
             area: area,
@@ -175,12 +142,12 @@ export class FreightController {
             free_by_number: item.free_by_number,
           };
           const groupI = await this.freightTemplateGroupService.add(info);
-          const areaArr = area.split(",");
+          const areaArr = area ? area.split(",") : [];
           for (const item of areaArr) {
             await this.freightTemplateDetailService.add({
               template_id: template_id,
               group_id: groupI.id,
-              area: item,
+              area: Number(item),
             });
           }
         }
@@ -191,8 +158,8 @@ export class FreightController {
   }
 
   @Post("freightdetail")
-  async freightdetailAction(@Request() req) {
-    const { id } = req.body;
+  async freightdetailAction(@Body() body) {
+    const { id } = body;
 
     const model = await this.freightTemplateGroupService.find({
       where: {
@@ -241,8 +208,8 @@ export class FreightController {
   }
 
   @Post("saveTable")
-  async saveTableAction(@Request() req) {
-    const { table: data, defaultData: def, info } = req.body;
+  async saveTableAction(@Body() body: DTO_Freight_AddTable) {
+    const { table: data, defaultData: def, info } = body;
 
     const idInfo = []; // 是已存在的id。如果大于零，则去循环。等于零，则先将已存在的data删除，然后判断，1，data的length > 0.则，说明有新的数据
     for (const item of data) {
@@ -328,7 +295,7 @@ export class FreightController {
             const e = await this.freightTemplateDetailService.find({
               where: {
                 template_id: template_id,
-                area: item,
+                area: Number(item),
                 group_id: id,
               },
             });
@@ -336,13 +303,13 @@ export class FreightController {
               await this.freightTemplateDetailService.add({
                 template_id: template_id,
                 group_id: id,
-                area: item,
+                area: Number(item),
               });
             }
           }
         } else {
           const template_id = info.id;
-          const area = item.area.substring(2);
+          const area = item.area;
           const val = {
             area: area,
             start: item.start,
@@ -359,7 +326,7 @@ export class FreightController {
             await this.freightTemplateDetailService.add({
               template_id: template_id,
               group_id: groupId.id,
-              area: item,
+              area: Number(item),
             });
           }
         }
@@ -380,7 +347,7 @@ export class FreightController {
 
       if (data.length != 0) {
         for (const item of data) {
-          const area = item.area.substring(2);
+          const area = item.area;
           const template_id = info.id;
           const val = {
             area: area,
@@ -399,7 +366,7 @@ export class FreightController {
             await this.freightTemplateDetailService.add({
               template_id: template_id,
               group_id: groupId.id,
-              area: item,
+              area: Number(item),
             });
           }
         }
@@ -446,9 +413,9 @@ export class FreightController {
   }
 
   // 删除快递模板
-  @Post("destory")
-  async destory(@Request() req) {
-    const { id } = req.body;
-    return await this.freightTemplateService.remove(Number(id));
+  @Post("remove")
+  async remove(@Body() body: DTO_Freight_Remove) {
+    const { id } = body;
+    return await this.freightTemplateService.remove(id);
   }
 }

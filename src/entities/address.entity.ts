@@ -1,6 +1,7 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 
+// 收件人地址表
 @Entity()
 @Index(["user_id"])
 export class Address {
@@ -8,13 +9,13 @@ export class Address {
   id: number;
 
   @Column({ type: "varchar", width: 50 })
-  name: string;
+  name: string; // 收件人姓名
 
   @Column({ type: "mediumint", unsigned: true, default: 0 })
-  user_id: number;
+  user_id: number; // 关联用户id，关联user列表Id
 
   @Column({ type: "smallint", default: 0 })
-  country_id: number;
+  country_id: number; // 国家代码，感觉暂时可以删除了
 
   @Column({ type: "smallint", default: 0 })
   province_id: number;
@@ -26,13 +27,13 @@ export class Address {
   district_id: number;
 
   @Column({ type: "varchar", length: 120 })
-  address: string;
+  address: string; // 收件人详细地址
 
   @Column({ type: "varchar", length: 60 })
-  mobile: string;
+  mobile: string; // 收件人电话
 
   @Column({ type: "tinyint", unsigned: true, default: 0 })
-  is_default: number;
+  is_default: number; // 是否默认收件地址
 
   @Column({ type: "tinyint", width: 1, default: 0, nullable: true })
   is_delete: boolean;
