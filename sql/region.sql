@@ -5,18 +5,35 @@
 DROP TABLE IF EXISTS `region`;
 CREATE TABLE `region` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_id` smallint(5) unsigned DEFAULT NULL,
-  `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-  `type` tinyint(1) NOT NULL DEFAULT 1,
-  `agency_id` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '没用到，可删除',
-  `area` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '方位，根据这个定运费',
-  `area_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' COMMENT '方位代码',
-  `far_area` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '偏远地区，没用到，可删除',
+  `parent_id` smallint(5) unsigned DEFAULT NULL COMMENT '父级区域Id',
+  `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '区域名称',
+  `type` tinyint(1) NOT NULL DEFAULT 1 COMMENT '区域层级： 1（省|直辖市|特别行政区）、2（市）、3（区|县）',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `parent_id` (`parent_id`) USING BTREE,
   KEY `region_type` (`type`) USING BTREE,
   KEY `agency_id` (`agency_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4047 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- -- ----------------------------
+-- -- Table structure for region
+-- -- ----------------------------
+-- DROP TABLE IF EXISTS `region`;
+-- CREATE TABLE `region` (
+--   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+--   `parent_id` smallint(5) unsigned DEFAULT NULL COMMENT '父级区域Id',
+--   `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+--   `type` tinyint(1) NOT NULL DEFAULT 1,
+--   `agency_id` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '没用到，可删除',
+--   `area` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '方位，根据这个定运费',
+--   `area_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' COMMENT '方位代码',
+--   `far_area` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '偏远地区，没用到，可删除',
+--   PRIMARY KEY (`id`) USING BTREE,
+--   KEY `parent_id` (`parent_id`) USING BTREE,
+--   KEY `region_type` (`type`) USING BTREE,
+--   KEY `agency_id` (`agency_id`) USING BTREE
+-- ) ENGINE=InnoDB AUTO_INCREMENT=4047 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- ----------------------------
 -- Records of region

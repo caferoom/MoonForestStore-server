@@ -71,10 +71,6 @@ export class UserService {
       .take(pageSize)
       .getManyAndCount();
 
-    // for (const item of data) {
-    //   item.nickname = Buffer.from(item.nickname, "base64").toString();
-    // }
-
     return {
       total,
       data,

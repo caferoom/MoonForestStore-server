@@ -13,7 +13,12 @@ import { OrderService } from "../../services/order.service";
 import { AddressService } from "../../services/address.service";
 import * as Express from "express";
 import { FootprintService } from "../../services/footprint.service";
-import { DTO_User_List } from "./dto/user.dto";
+import {
+  DTO_User_Address_List,
+  DTO_User_List,
+  IUser_Address_List,
+  OUT_User_Address_List,
+} from "./dto/user.dto";
 
 @Controller("user")
 @UseGuards(AuthGuard("jwt"))
@@ -50,6 +55,36 @@ export class UsersController {
   async accountEnable(@Body() body) {
     const { id, enable } = body;
     return await this.userService.accountEnable(id, enable);
+  }
+
+  @Post("addressList")
+  async getAddressList(@Body() body: DTO_User_Address_List) {
+    const { page, size, id } = body;
+
+    const { total, data: originData } = await this.addressService.getAddressList({
+      id,
+      page,
+      pageSize: size,
+    });
+
+    const d = originData.map(async (origin) => {
+      const data = new IUser_Address_List();
+      data.id = origin.id;
+      data.fullAddress = await this.regionService.getCombinedAddress(
+        origin.district_id,
+        origin.address,
+      );
+      data.mobile = origin.mobile;
+      data.is_default = origin.is_default;
+      data.name = origin.name;
+      return data;
+    });
+
+    const obj = new OUT_User_Address_List();
+    obj.currentPage = page;
+    obj.total = total;
+    obj.data = await Promise.all(d);
+    return obj;
   }
 
   @Get("")
