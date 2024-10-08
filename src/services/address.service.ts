@@ -15,12 +15,19 @@ export class AddressService {
     this.repository = addressRepository;
   }
 
-  async getAddressList(params: { page: number; pageSize: number; id: number }) {
-    const { page = 1, pageSize = 10, id } = params;
+  async getAddressList(params: {
+    page: number;
+    pageSize: number;
+    id: number;
+    sortField?: string;
+    sortType?: "ASC" | "DESC";
+  }) {
+    const { page = 1, pageSize = 10, id, sortField = "is_default", sortType = "DESC" } = params;
 
     const [data, total] = await this.repository
       .createQueryBuilder()
       .where({ user_id: id })
+      .orderBy(sortField, sortType)
       .skip((page - 1) * pageSize)
       .take(pageSize)
       .getManyAndCount();
@@ -29,5 +36,20 @@ export class AddressService {
       total,
       data,
     };
+  }
+
+  async setDefaultAddress(params: { userId: number; recordId: number }) {
+    const { userId, recordId } = params;
+
+    await this.repository.update(
+      {
+        user_id: userId,
+      },
+      {
+        is_default: false,
+      },
+    );
+
+    await this.repository.update({ user_id: userId, id: recordId }, { is_default: true });
   }
 }

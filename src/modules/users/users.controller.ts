@@ -54,6 +54,7 @@ export class UsersController {
   @Post("accountEnable")
   async accountEnable(@Body() body) {
     const { id, enable } = body;
+
     return await this.userService.accountEnable(id, enable);
   }
 
@@ -75,8 +76,12 @@ export class UsersController {
         origin.address,
       );
       data.mobile = origin.mobile;
-      data.is_default = origin.is_default;
+      data.is_default = !!origin.is_default;
       data.name = origin.name;
+      data.province_id = origin.province_id;
+      data.city_id = origin.city_id;
+      data.district_id = origin.district_id;
+      data.address = origin.address;
       return data;
     });
 
@@ -85,6 +90,20 @@ export class UsersController {
     obj.total = total;
     obj.data = await Promise.all(d);
     return obj;
+  }
+
+  @Post("deleteAddress")
+  async deleteAddress(@Body() body: { id: string }) {
+    const { id } = body;
+
+    return await this.addressService.repository.delete(id);
+  }
+
+  @Post("setDefaultAddress")
+  async setDefaultAddress(@Body() body: { userId: number; recordId: number }) {
+    const { userId, recordId } = body;
+
+    return await this.addressService.setDefaultAddress({ userId, recordId });
   }
 
   @Get("")

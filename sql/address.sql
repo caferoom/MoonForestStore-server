@@ -5,7 +5,7 @@
 DROP TABLE IF EXISTS `address`;
 CREATE TABLE `address` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '收件人姓名',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '收件人姓名',
   `user_id` mediumint(8) unsigned NOT NULL COMMENT '关联用户id,关联user列表Id',
   `province_id` smallint(6) NOT NULL COMMENT '收件人省区id,关联region列表Id',
   `city_id` smallint(6) NOT NULL COMMENT '收件人城市id,关联region列表Id',

@@ -19,7 +19,6 @@ class IUser_list_filters {
   @IsString()
   nickname: string;
 
-  @ValidateNested({ each: true })
   @IsOptional()
   @Type(() => IStringOrNullValidator)
   lastLoginDateRange: IStringOrNullValidator[];
@@ -99,7 +98,7 @@ export class IUser_Address_List {
 
   @Type(() => String)
   @IsString()
-  fullAddress: string; // 收件人详细地址
+  fullAddress: string; // 收件人地址
 
   @Type(() => String)
   @IsString()
@@ -108,4 +107,20 @@ export class IUser_Address_List {
   @Type(() => Boolean)
   @IsBoolean()
   is_default: boolean; // 是否默认收件地址
+
+  @Type(() => Number)
+  @IsNumber()
+  province_id: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  city_id: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  district_id: number;
+
+  @Type(() => String)
+  @IsString()
+  address: string; // 收件人具体地址
 }
