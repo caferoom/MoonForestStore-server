@@ -2,7 +2,7 @@ import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as Express from "express";
 import { GoodsService } from "../../services/goods.service";
-import { CategoryService } from "../../services/category.service";
+import { GoodsCateGoriesService } from "../../services/goods_categories.service";
 import { CartService } from "../../services/cart.service";
 import { ProductService } from "../../services/product.service";
 import { GoodsSpecification } from "src/entities/goods_specification.entity";
@@ -13,7 +13,7 @@ export class WapController {
   constructor(
     private cartService: CartService,
     private goodsService: GoodsService,
-    private categoryService: CategoryService,
+    private goodsCateGoriesService: GoodsCateGoriesService,
     private productService: ProductService,
   ) {}
 
@@ -213,11 +213,11 @@ export class WapController {
     });
 
     for (const item of data) {
-      const info = await this.categoryService.findOneById(item.category_id);
+      const info = await this.goodsCateGoriesService.repository.findOneById(item.category_id);
 
       (item as any).category_name = info.name;
       if (info.parent_id != 0) {
-        const parentInfo = await this.categoryService.findOneById(info.parent_id);
+        const parentInfo = await this.goodsCateGoriesService.repository.findOneById(info.parent_id);
 
         (item as any).category_p_name = parentInfo.name;
       }

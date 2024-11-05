@@ -9,13 +9,14 @@ export class Order {
   id: number;
 
   @Column({ type: "varchar", length: 20 })
-  order_sn: string;
+  order_sn: string; // 订单号
 
   @Column({ type: "mediumint", unsigned: true, default: 0 })
   user_id: number;
 
+  // todo 是不是缺少一个 交易成功（未评价一定时间后自动交易成功）这里可能需要看下是怎么自动变更状态的，每天定时任务么？？
   @Column({ type: "mediumint", unsigned: true, default: 0 })
-  order_status: number;
+  order_status: number; // 101: 待付款; 102: 交易关闭；103：交易关闭（到达时间系统自动取消交易）201：待备货；300：待发货；301：已发货；302：待评价；303：待评价（到达时间系统自动收货）；401：交易成功
 
   @Column({ type: "tinyint", unsigned: true, nullable: true, default: 0 })
   offline_pay: number;
@@ -30,31 +31,31 @@ export class Order {
   pay_status: number;
 
   @Column({ type: "varchar", length: 60 })
-  consignee: string;
+  consignee: string; // 收件人姓名
 
   @Column({ type: "smallint", unsigned: true, default: 0 })
-  country: string;
+  country: string; // 收件地址 国家 todo 这个可以删除了
 
   @Column({ type: "smallint", unsigned: true, default: 0 })
-  province: string;
+  province: string; // 收件地址，省份
 
   @Column({ type: "smallint", unsigned: true, default: 0 })
-  city: string;
+  city: string; // 收件地址，城市
 
   @Column({ type: "smallint", unsigned: true, default: 0 })
-  district: string;
+  district: string; // 收件地址，区域
 
   @Column({ type: "varchar", length: 255 })
-  address: string;
+  address: string; // 收件地址 详细地址
 
   @Column({ type: "varchar", length: 255 })
   print_info: string;
 
   @Column({ type: "varchar", length: 255 })
-  mobile: string;
+  mobile: string; // 收件人联系电话
 
   @Column({ type: "varchar", length: 255 })
-  postscript: string;
+  postscript: string; // 买家备注
 
   @Column({ type: "varchar", length: 255, nullable: true, default: null })
   admin_memo: string;
@@ -69,10 +70,10 @@ export class Order {
   pay_id: string;
 
   @Column({ type: "decimal", unsigned: true, precision: 10, scale: 2, default: 0.0 })
-  change_price: number;
+  change_price: number; // 改价前价格，原价？？，
 
   @Column({ type: "decimal", unsigned: true, precision: 10, scale: 2, default: 0.0 })
-  actual_price: number;
+  actual_price: number; // 实际支付价格，改价后价格。todo 这里是不是没有优惠卷逻辑，打折逻辑？？？
 
   @Column({ type: "decimal", precision: 10, scale: 2, default: 0.0 })
   order_price: number;
@@ -80,8 +81,8 @@ export class Order {
   @Column({ type: "decimal", precision: 10, scale: 2, default: 0.0 })
   goods_price: number;
 
-  @Column({ type: "int", unsigned: true, default: 0 })
-  add_time: number;
+  @Column({ type: "int", unsigned: true })
+  add_time: number; // 下单时间
 
   @Column({ type: "int", unsigned: true, default: null, nullable: true }) // TODO: 这里是nullable比较好
   pay_time: number;
@@ -96,7 +97,7 @@ export class Order {
   dealdone_time: number;
 
   @Column({ type: "int", unsigned: true, default: 0 })
-  freight_price: number;
+  freight_price: number; // 运费
 
   @Column({ type: "decimal", precision: 10, scale: 2, default: 480.0 })
   express_value: number;

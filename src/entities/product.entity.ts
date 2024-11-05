@@ -35,7 +35,7 @@ export class Product {
   @Column({ type: "double", precision: 6, scale: 2, default: 0.0 })
   goods_weight: number;
 
-  // todo 好像没用到？？？
+  // 没用到可以删除了
   @Column({ type: "tinyint", width: 1, default: 0 })
   has_change: boolean;
 

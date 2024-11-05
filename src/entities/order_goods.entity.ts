@@ -1,6 +1,7 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 
+// 一个订单中商品相关数据
 @Entity()
 @Index(["order_id", "goods_id"])
 export class OrderGoods {
@@ -8,7 +9,7 @@ export class OrderGoods {
   id: number;
 
   @Column({ type: "mediumint", unsigned: true, default: 0 })
-  order_id: number;
+  order_id: number; // 关联的order表的id
 
   @Column({ type: "mediumint", unsigned: true, default: 0 })
   goods_id: number;

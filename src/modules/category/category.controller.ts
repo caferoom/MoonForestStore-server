@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
-import { CategoryService } from "../../services/category.service";
+import { GoodsCateGoriesService } from "../../services/goods_categories.service";
 import {
   CategoryStatusDTO,
   ChannelStatusDTO,
@@ -14,58 +14,18 @@ import { BusinessException } from "src/common/exceptions/business.exception";
 @Controller("category")
 @UseGuards(AuthGuard("jwt"))
 export class CategoryController {
-  constructor(private categoryService: CategoryService) {}
+  constructor(private goodsCateGoriesService: GoodsCateGoriesService) {}
 
-  @Get("")
-  async indexAction() {
-    const data = await this.categoryService.find({
-      order: {
-        sort_order: "ASC",
-      },
-    });
-
-    const topCategory = data.filter((item) => {
-      return item.parent_id === 0;
-    });
-
-    data.forEach((d) => {
-      if (d.is_show === 1) {
-        (d as any).is_show = true;
-      } else {
-        (d as any).is_show = false;
-      }
-      if (d.is_channel === 1) {
-        (d as any).is_channel = true;
-      } else {
-        (d as any).is_channel = false;
-      }
-      if (d.is_category === 1) {
-        (d as any).is_category = true;
-      } else {
-        (d as any).is_category = false;
-      }
-    });
-    const categoryList = [];
-
-    topCategory.map((item) => {
-      (item as any).level = 1;
-      categoryList.push(item);
-
-      data.map((child) => {
-        if (child.parent_id === item.id) {
-          (child as any).level = 2;
-          categoryList.push(child);
-        }
-      });
-    });
-    return categoryList;
+  @Get("all")
+  async all() {
+    return await this.goodsCateGoriesService.getAllAsTree();
   }
 
   @Post("updateSort")
   async updateSortAction(@Body() body) {
     const { id, sort } = body;
 
-    const category = await this.categoryService.findOne({ where: { id } });
+    const category = await this.goodsCateGoriesService.repository.findOne({ where: { id } });
     if (!category) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
@@ -73,12 +33,12 @@ export class CategoryController {
       });
     }
     category.sort_order = sort;
-    return this.categoryService.save(category);
+    return this.goodsCateGoriesService.repository.save(category);
   }
 
   @Get("topCategory")
   async topCategoryAction() {
-    const [data] = await this.categoryService.findAndCount({
+    const [data] = await this.goodsCateGoriesService.repository.findAndCount({
       where: {
         parent_id: 0,
       },
@@ -95,7 +55,7 @@ export class CategoryController {
   @Get("info")
   async infoAction(@Query() query) {
     const { id } = query;
-    return await this.categoryService.findOneById(id);
+    return await this.goodsCateGoriesService.repository.findOneById(id);
   }
 
   @Post("store")
@@ -104,10 +64,10 @@ export class CategoryController {
     const { id } = body;
 
     if (id > 0) {
-      await this.categoryService.update({ id: id }, values);
+      await this.goodsCateGoriesService.repository.update({ id: id }, values);
     } else {
       delete values.id;
-      await this.categoryService.add(values);
+      await this.goodsCateGoriesService.repository.save(values);
     }
     return values;
   }
@@ -116,7 +76,7 @@ export class CategoryController {
   async destoryAction(@Body() body: DeleteIconImageDTO) {
     const { id } = body;
 
-    const data = await this.categoryService.find({
+    const data = await this.goodsCateGoriesService.repository.find({
       where: {
         parent_id: id,
       },
@@ -128,56 +88,51 @@ export class CategoryController {
         message: "未查询到相关数据，删除失败",
       });
     } else {
-      await this.categoryService.delete({
+      await this.goodsCateGoriesService.repository.delete({
         id: id,
       });
     }
   }
 
   @Get("showStatus")
-  async showStatusAction(@Query() query: ShowStatusDTO) {
+  async showStatus(@Query() query: ShowStatusDTO) {
     const { id, status } = query;
-    await this.categoryService.update(
-      {
-        id: id,
-      },
-      {
-        is_show: status ? 1 : 0,
-      },
-    );
+    return await this.goodsCateGoriesService.repository.update(id, {
+      is_show: status,
+    });
   }
 
-  @Get("channelStatus")
-  async channelStatusAction(@Query() query: ChannelStatusDTO) {
-    const { id, status } = query;
-    await this.categoryService.update(
-      {
-        id: id,
-      },
-      {
-        is_channel: status === "true" ? 1 : 0,
-      },
-    );
-  }
+  // @Get("channelStatus")
+  // async channelStatusAction(@Query() query: ChannelStatusDTO) {
+  //   const { id, status } = query;
+  //   await this.goodsCateGoriesService.repository.update(
+  //     {
+  //       id: id,
+  //     },
+  //     {
+  //       is_channel: status === "true" ? 1 : 0,
+  //     },
+  //   );
+  // }
 
-  @Get("categoryStatus")
-  async categoryStatusAction(@Query() query: CategoryStatusDTO) {
-    const { id, status } = query;
+  // @Get("categoryStatus")
+  // async categoryStatusAction(@Query() query: CategoryStatusDTO) {
+  //   const { id, status } = query;
 
-    await this.categoryService.update(
-      {
-        id: id,
-      },
-      {
-        is_category: status === "true" ? 1 : 0,
-      },
-    );
-  }
+  //   await this.goodsCateGoriesService.repository.update(
+  //     {
+  //       id: id,
+  //     },
+  //     {
+  //       is_category: status === "true" ? 1 : 0,
+  //     },
+  //   );
+  // }
 
   @Post("deleteBannerImage")
   async deleteBannerImageAction(@Body() body: DeleteIconImageDTO) {
     const { id } = body;
-    await this.categoryService.update(
+    await this.goodsCateGoriesService.repository.update(
       {
         id: id,
       },
@@ -187,11 +142,11 @@ export class CategoryController {
     );
   }
 
-  @Post("deleteIconImage")
-  async deleteIconImageAction(@Body() body: DeleteIconImageDTO) {
-    const { id } = body;
-    await this.categoryService.update({ id: id }, { icon_url: null });
+  // @Post("deleteIconImage")
+  // async deleteIconImageAction(@Body() body: DeleteIconImageDTO) {
+  //   const { id } = body;
+  //   await this.goodsCateGoriesService.repository.update({ id: id }, { icon_url: null });
 
-    return true;
-  }
+  //   return true;
+  // }
 }

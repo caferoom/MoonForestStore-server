@@ -4,7 +4,7 @@ import * as Express from "express";
 import { GoodsService } from "../../services/goods.service";
 import { ILike, In, LessThanOrEqual, MoreThan, Not } from "typeorm";
 import { cloneDeep } from "lodash";
-import { CategoryService } from "../../services/category.service";
+import { GoodsCateGoriesService } from "../../services/goods_categories.service";
 import { ProductService } from "../../services/product.service";
 import { GoodsSpecificationService } from "../../services/goodsSpecification.service";
 import { CartService } from "../../services/cart.service";
@@ -20,7 +20,7 @@ import { DTO_Goods_All, DTO_Goods_SaleStatus } from "./dto/goods.dto";
 export class GoodsController {
   constructor(
     private goodsService: GoodsService,
-    private categoryService: CategoryService,
+    private goodsCateGoriesService: GoodsCateGoriesService,
     private specificationService: SpecificationService,
     private cartService: CartService,
     private productService: ProductService,
@@ -51,7 +51,7 @@ export class GoodsController {
       });
     }
 
-    const cateData = await this.categoryService.find({
+    const cateData = await this.goodsCateGoriesService.repository.find({
       where: {
         parent_id: 0,
       },
@@ -256,7 +256,7 @@ export class GoodsController {
     const data = cloneDeep(_data);
 
     for (const item of data) {
-      const info = await this.categoryService.findOneById(item.category_id);
+      const info = await this.goodsCateGoriesService.repository.findOneById(item.category_id);
 
       (item as any).category_name = info.name;
       // if (item.is_on_sale == 1) {
@@ -312,7 +312,7 @@ export class GoodsController {
 
     const data = cloneDeep(_data);
     for (const item of data) {
-      const info = await this.categoryService.findOneById(item.category_id);
+      const info = await this.goodsCateGoriesService.repository.findOneById(item.category_id);
 
       (item as any).category_name = info.name;
       // if (item.is_on_sale == 1) {
@@ -433,78 +433,79 @@ export class GoodsController {
     return specOptionsData;
   }
 
-  @Get("getAllCategory1")
-  async getAllCategory1Action() {
-    const data = await this.categoryService.find({
-      where: {
-        is_show: 1,
-        level: "L1",
-      },
-    });
+  // @Get("getAllCategory1")
+  // async getAllCategory1Action() {
+  //   const data = await this.categoryService.repository.find({
+  //     where: {
+  //       is_show: 1,
+  //       level: "L1",
+  //     },
+  //   });
 
-    const c_data = await this.categoryService.find({
-      where: {
-        is_show: 1,
-        level: "L2",
-      },
-    });
+  //   const c_data = await this.categoryService.repository.find({
+  //     where: {
+  //       is_show: 1,
+  //       level: "L2",
+  //     },
+  //   });
 
-    const newData = [];
-    for (const item of data) {
-      const children = [];
-      for (const citem of c_data) {
-        if (citem.parent_id === item.id) {
-          children.push({
-            value: citem.id,
-            label: citem.name,
-          });
-        }
-      }
-      newData.push({
-        value: item.id,
-        label: item.name,
-        children: children,
-      });
-    }
-    return newData;
-  }
+  //   const newData = [];
+  //   for (const item of data) {
+  //     const children = [];
+  //     for (const citem of c_data) {
+  //       if (citem.parent_id === item.id) {
+  //         children.push({
+  //           value: citem.id,
+  //           label: citem.name,
+  //         });
+  //       }
+  //     }
+  //     newData.push({
+  //       value: item.id,
+  //       label: item.name,
+  //       children: children,
+  //     });
+  //   }
+  //   return newData;
+  // }
 
   @Get("getAllCategory")
   async getAllCategoryAction() {
-    const data = await this.categoryService.find({
-      where: {
-        is_show: 1,
-        level: "L1",
-      },
-      select: ["id", "name"],
-    });
+    this.goodsCateGoriesService.getAllAsTree();
+    // const data = await this.categoryService.repository.find({
+    //   where: {
+    //     is_show: 1,
+    //     level: "L1",
+    //   },
+    //   select: ["id", "name"],
+    // });
 
-    const newData = [];
-    for (const item of data) {
-      const children = [];
+    // const newData = [];
+    // for (const item of data) {
+    //   const children = [];
 
-      const c_data = await this.categoryService.find({
-        where: {
-          is_show: 1,
-          level: "L2",
-          parent_id: item.id,
-        },
-        select: ["id", "name"],
-      });
+    //   const c_data = await this.categoryService.repository.find({
+    //     where: {
+    //       is_show: 1,
+    //       level: "L2",
+    //       parent_id: item.id,
+    //     },
+    //     select: ["id", "name"],
+    //   });
 
-      for (const c_item of c_data) {
-        children.push({
-          value: c_item.id,
-          label: c_item.name,
-        });
-      }
-      newData.push({
-        value: item.id,
-        label: item.name,
-        children: children,
-      });
-    }
-    return newData;
+    //   for (const c_item of c_data) {
+    //     children.push({
+    //       value: c_item.id,
+    //       label: c_item.name,
+    //     });
+    //   }
+    //   newData.push({
+    //     value: item.id,
+    //     label: item.name,
+    //     children: children,
+    //   });
+    // }
+    // return newData;
   }
 
   @Post("store")

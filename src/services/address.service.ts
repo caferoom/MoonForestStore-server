@@ -15,6 +15,9 @@ export class AddressService {
     this.repository = addressRepository;
   }
 
+  /**
+   * 获取某个用户(id)的收件地址列表
+   */
   async getAddressList(params: {
     page: number;
     pageSize: number;
@@ -38,6 +41,9 @@ export class AddressService {
     };
   }
 
+  /**
+   * 设置条目(recordId)为用户(userId)的默认收件地址
+   */
   async setDefaultAddress(params: { userId: number; recordId: number }) {
     const { userId, recordId } = params;
 

@@ -16,6 +16,7 @@ import { FootprintService } from "../../services/footprint.service";
 import {
   DTO_User_Address_List,
   DTO_User_List,
+  DTO_User_Save_Address,
   IUser_Address_List,
   OUT_User_Address_List,
 } from "./dto/user.dto";
@@ -34,7 +35,7 @@ export class UsersController {
   ) {}
 
   @Post("list")
-  async ind(@Body() body: DTO_User_List) {
+  async list(@Body() body: DTO_User_List) {
     const { page, size, sortField, sortType, filters } = body;
     const { total, data } = await this.userService.getUserList({
       page,
@@ -104,6 +105,37 @@ export class UsersController {
     const { userId, recordId } = body;
 
     return await this.addressService.setDefaultAddress({ userId, recordId });
+  }
+
+  @Post("saveAddress")
+  async saveAddressAction(@Body() body: DTO_User_Save_Address) {
+    const { user_id, id, name, mobile, address, selectedRegionOptions } = body;
+
+    if (id) {
+      return await this.addressService.repository.update(
+        {
+          id: id,
+        },
+        {
+          name: name,
+          mobile: mobile,
+          address: address,
+          province_id: selectedRegionOptions[0],
+          district_id: selectedRegionOptions[2],
+          city_id: selectedRegionOptions[1],
+        },
+      );
+    } else {
+      return await this.addressService.repository.save({
+        user_id: user_id,
+        name: name,
+        mobile: mobile,
+        address: address,
+        province_id: selectedRegionOptions[0],
+        district_id: selectedRegionOptions[2],
+        city_id: selectedRegionOptions[1],
+      });
+    }
   }
 
   @Get("")
@@ -251,7 +283,7 @@ export class UsersController {
     }
     return {
       data,
-      currentPage: page,
+      currentPage: Number(page),
       count: count,
     };
   }
@@ -279,31 +311,6 @@ export class UsersController {
     };
   }
 
-  @Post("saveaddress")
-  async saveaddressAction(@Request() req) {
-    const { id, user_id, name, mobile, address, addOptions } = req.body;
-
-    const province = addOptions[0];
-    const city = addOptions[1];
-    const district = addOptions[2];
-    const info = {
-      name: name,
-      mobile: mobile,
-      address: address,
-      province_id: province,
-      district_id: district,
-      city_id: city,
-    };
-    await this.addressService.repository.update(
-      {
-        user_id: user_id,
-        id: id,
-      },
-      info,
-    );
-
-    return true;
-  }
 
   @Get("cartdata")
   async cartdataAction(@Request() req) {

@@ -14,6 +14,7 @@ export class RegionService {
     this.repository = regionRepository;
   }
 
+  // 获取省市区树状接口list
   async getRegionsHierarchy() {
     const aData = await this.regionRepository.find({ where: { type: 1 } });
     const bData = await this.regionRepository.find({ where: { type: 2 } });
@@ -43,6 +44,7 @@ export class RegionService {
     return newData;
   }
 
+  // 输入区域id和详细信息及门牌号字符串,返回包含省市区的完全地址
   async getCombinedAddress(id: number, detailAddress?: string) {
     const district = await this.regionRepository.findOne({
       where: {
@@ -62,6 +64,7 @@ export class RegionService {
     return `${province_name}${city_name}${district_name}${detailAddress || ""}`;
   }
 
+  // 获取所有省份列表
   async getAllProvinces() {
     return await this.regionRepository.find({ where: { type: 1 } });
   }

@@ -6,8 +6,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Goods } from "src/entities/goods.entity";
 import { GoodsSpecification } from "src/entities/goods_specification.entity";
 import { GoodsSpecificationService } from "../../services/goodsSpecification.service";
-import { CategoryService } from "../../services/category.service";
-import { Category } from "src/entities/category.entity";
+import { GoodsCateGoriesService } from "../../services/goods_categories.service";
+import { Goods_Categories } from "src/entities/goods_categories.entity";
 import { Product } from "src/entities/product.entity";
 import { ProductService } from "../../services/product.service";
 import { CartService } from "../../services/cart.service";
@@ -23,7 +23,7 @@ import { FreightTemplate } from "src/entities/freight_template.entity";
   imports: [
     TypeOrmModule.forFeature([
       Goods,
-      Category,
+      Goods_Categories,
       Cart,
       GoodsSpecification,
       GoodsGallery,
@@ -38,7 +38,7 @@ import { FreightTemplate } from "src/entities/freight_template.entity";
     GoodsGalleryService,
     SpecificationService,
     FreightTemplateService,
-    CategoryService,
+    GoodsCateGoriesService,
     CartService,
     ProductService,
     JwtStrategy,

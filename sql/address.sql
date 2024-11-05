@@ -10,10 +10,10 @@ CREATE TABLE `address` (
   `province_id` smallint(6) NOT NULL COMMENT '收件人省区id,关联region列表Id',
   `city_id` smallint(6) NOT NULL COMMENT '收件人城市id,关联region列表Id',
   `district_id` smallint(6) NOT NULL COMMENT '收件人区域id,关联region列表Id',
-  `address` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-  `mobile` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-  `is_default` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `is_delete` tinyint(1) unsigned DEFAULT '0',
+  `address` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '详细地址与门牌号',
+  `mobile` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '收件人手机号',
+  `is_default` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否默认收件地址',
+  `is_delete` tinyint(1) unsigned DEFAULT '0' COMMENT '是否已删除',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `user_id` (`user_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=2183 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

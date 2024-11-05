@@ -1,5 +1,6 @@
-import { Transform, Type } from "class-transformer";
+import { Type } from "class-transformer";
 import {
+  ArrayNotEmpty,
   IsArray,
   IsBoolean,
   IsNumber,
@@ -71,6 +72,33 @@ export class DTO_User_Address_List {
   @Type(() => Number)
   @IsNumber()
   size: number;
+}
+
+export class DTO_User_Save_Address {
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  user_id: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  id: number;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  mobile: string;
+
+  @IsString()
+  address: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @Type(() => Number)
+  @IsNumber({}, { each: true })
+  selectedRegionOptions: number[];
 }
 
 export class OUT_User_Address_List {
