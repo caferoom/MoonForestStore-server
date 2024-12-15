@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards, Request, Post, Body } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AdminService } from "../../services/admin.service";
-import { Admin } from "src/entities/admin.entity";
+import { Admin } from "src/entities_old/admin.entity";
 import * as crypto from "crypto-js";
 import { BusinessException } from "src/common/exceptions/business.exception";
 import { BUSINESS_ERROR_CODE } from "src/common/exceptions/business.error.codes";

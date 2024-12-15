@@ -96,38 +96,8 @@ export class CategoryController {
 
   @Get("showStatus")
   async showStatus(@Query() query: ShowStatusDTO) {
-    const { id, status } = query;
-    return await this.goodsCateGoriesService.repository.update(id, {
-      is_show: status,
-    });
+    return await this.goodsCateGoriesService.changeShowStatus(query);
   }
-
-  // @Get("channelStatus")
-  // async channelStatusAction(@Query() query: ChannelStatusDTO) {
-  //   const { id, status } = query;
-  //   await this.goodsCateGoriesService.repository.update(
-  //     {
-  //       id: id,
-  //     },
-  //     {
-  //       is_channel: status === "true" ? 1 : 0,
-  //     },
-  //   );
-  // }
-
-  // @Get("categoryStatus")
-  // async categoryStatusAction(@Query() query: CategoryStatusDTO) {
-  //   const { id, status } = query;
-
-  //   await this.goodsCateGoriesService.repository.update(
-  //     {
-  //       id: id,
-  //     },
-  //     {
-  //       is_category: status === "true" ? 1 : 0,
-  //     },
-  //   );
-  // }
 
   @Post("deleteBannerImage")
   async deleteBannerImageAction(@Body() body: DeleteIconImageDTO) {
@@ -141,12 +111,4 @@ export class CategoryController {
       },
     );
   }
-
-  // @Post("deleteIconImage")
-  // async deleteIconImageAction(@Body() body: DeleteIconImageDTO) {
-  //   const { id } = body;
-  //   await this.goodsCateGoriesService.repository.update({ id: id }, { icon_url: null });
-
-  //   return true;
-  // }
 }

@@ -28,7 +28,7 @@ export class QiniuService {
       returnBody: `{
         "message": "upload success",
         "success": true,
-        "data": {"fileUrl":"https://${domain}/$(key)","fileSize":"$(fsize)","fileType":"$(mimeType)","fileName":"$(key)"}
+        "data": {"fileUrl":"http://${domain}/$(key)","fileSize":"$(fsize)","fileType":"$(mimeType)","fileName":"$(key)"}
       }`,
     };
     const putPolicy = new qiniu.rs.PutPolicy(options);
@@ -48,7 +48,7 @@ export class QiniuService {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       params: {
-        tbl: "moonforest",
+        tbl: "luckmmon",
       },
     });
     return result?.data[0] ?? "";

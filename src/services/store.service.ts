@@ -5,7 +5,7 @@ import {
   ShowSettings,
   IShowSettingsCreateMembers,
   IShowSettingsUpdateMembers,
-} from "src/entities/show_settings.entity";
+} from "src/entities_old/show_settings.entity";
 import { Repository } from "typeorm";
 
 @Injectable()

@@ -4,7 +4,7 @@ import { NoticeController } from "./notice.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Notice } from "src/entities/notice.entity";
-import { Settings } from "src/entities/settings.entity";
+import { Settings } from "src/entities_old/settings.entity";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notice])],

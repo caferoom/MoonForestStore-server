@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Goods_Categories } from "src/entities/goods_categories.entity";
+import { Goods_Categories } from "src/entities_old/goods_categories.entity";
 
 import { Repository } from "typeorm";
 
@@ -57,4 +57,10 @@ export class GoodsCateGoriesService {
   }
 
   // 改变is_show状态
+  async changeShowStatus(query: { id: number; status: boolean }) {
+    const { id, status } = query;
+    return this.repository.update(id, {
+      is_show: status,
+    });
+  }
 }

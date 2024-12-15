@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
-import { Admin } from "src/entities/admin.entity";
+import { Admin } from "src/entities_old/admin.entity";
 import { Repository } from "typeorm";
 import * as crypto from "crypto-js";
 

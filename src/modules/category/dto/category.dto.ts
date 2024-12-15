@@ -1,4 +1,4 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { IsBoolean, IsNumber, IsString } from "class-validator";
 
 export class DeleteIconImageDTO {
@@ -27,7 +27,7 @@ export class ShowStatusDTO {
   @IsNumber()
   id: number;
 
-  @Type(() => Boolean)
+  @Transform(({ value }) => String(value).toLowerCase() === "true")
   @IsBoolean()
   status: boolean;
 }

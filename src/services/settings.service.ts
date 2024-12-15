@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Settings } from "src/entities/settings.entity";
+import { Settings } from "src/entities_old/settings.entity";
 import { Repository } from "typeorm";
 
 type PartialSenderInfo = Pick<

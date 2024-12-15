@@ -5,7 +5,7 @@ import {
   IOrderGoodsCreateMembers,
   IOrderGoodsUpdateMembers,
   OrderGoods,
-} from "src/entities/order_goods.entity";
+} from "src/entities_old/order_item.entity";
 import { Repository } from "typeorm";
 
 @Injectable()

@@ -1,20 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { BaseService } from "src/common/base.service";
-import { IProductCreateMembers, IProductUpdateMembers, Product } from "src/entities/product.entity";
+import { Product } from "src/entities_old/product.entity";
 
 import { Repository } from "typeorm";
 
 @Injectable()
-export class ProductService extends BaseService<
-  Product,
-  IProductCreateMembers,
-  IProductUpdateMembers
-> {
+export class ProductService {
+  public repository: Repository<Product>;
+
   constructor(
     @InjectRepository(Product)
-    private product: Repository<Product>,
+    private productRepository: Repository<Product>,
   ) {
-    super(product);
+    this.repository = productRepository;
   }
 }

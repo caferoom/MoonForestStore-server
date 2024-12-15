@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import { JwtService } from "@nestjs/jwt";
-import { Admin } from "src/entities/admin.entity";
+import { Admin } from "src/entities_old/admin.entity";
 import { Request } from "express";
 
 @Injectable()

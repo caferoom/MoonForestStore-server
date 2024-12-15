@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ExceptArea } from "src/entities/except_area.entity";
+import { ExceptArea } from "src/entities_old/except_area.entity";
 
 import { Repository } from "typeorm";
 

@@ -5,7 +5,7 @@ import { GoodsService } from "../../services/goods.service";
 import { GoodsCateGoriesService } from "../../services/goods_categories.service";
 import { CartService } from "../../services/cart.service";
 import { ProductService } from "../../services/product.service";
-import { GoodsSpecification } from "src/entities/goods_specification.entity";
+import { GoodsSpecification } from "src/entities_old/goods_specification.entity";
 
 @Controller("address")
 @UseGuards(AuthGuard("jwt"))

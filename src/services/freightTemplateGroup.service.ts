@@ -5,7 +5,7 @@ import {
   FreightTemplateGroup,
   IFreightTemplateGroupCreateMembers,
   IFreightTemplateGroupUpdateMembers,
-} from "src/entities/freight_template_group.entity";
+} from "src/entities_old/freight_template_group.entity";
 
 import { Repository } from "typeorm";
 

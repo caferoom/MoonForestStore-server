@@ -5,7 +5,7 @@ import {
   IGoodsGalleryCreateMembers,
   IGoodsGalleryUpdateMembers,
   GoodsGallery,
-} from "src/entities/goods_gallery.entity";
+} from "src/entities_old/goods_gallery.entity";
 
 import { Repository } from "typeorm";
 

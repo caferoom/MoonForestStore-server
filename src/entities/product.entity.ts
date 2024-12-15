@@ -1,68 +1,26 @@
-import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, Index } from "typeorm";
 
-// product表个goods表有啥区别？？
 @Entity()
+@Index(["category_id"])
 export class Product {
-  @PrimaryGeneratedColumn({ type: "mediumint", unsigned: true })
-  id: number;
+  @PrimaryGeneratedColumn({ type: "bigint", unsigned: true })
+  id: number; // '主键, 商品ID'
 
-  // 映射 goods表的id
-  @Column({ type: "mediumint", unsigned: true, default: 0 })
-  goods_id: number;
+  @Column({ type: "bigint", unsigned: true })
+  category_id: number; // '分类ID, 关联category表'
 
-  // 这个goods_specification_ids 是 会存放多个specification_id么？在carts里面好像会用_分割。其他地方好像直接当成只存1个，需要看下id
-  @Column({ type: "varchar", length: 50 })
-  goods_specification_ids: string;
+  @Column({ type: "tinyint", width: 1, unsigned: true, default: 0 })
+  is_on_sale: boolean; // '商品状态, 1 在售 0 下架'
 
-  // 商品sku todo 这个是干嘛的？？
-  @Column({ type: "varchar", length: 60 })
-  goods_sn: string;
+  @Column({ type: "varchar", length: 120 })
+  name: string; // '商品名称'
 
-  // 库存数目
-  @Column({ type: "mediumint", unsigned: true, default: 0 })
-  goods_number: string;
+  @Column({ type: "int", unsigned: true, default: 0 })
+  sell_volume: number; // '销售量'
 
-  // 零售价（元）
-  @Column({ type: "decimal", unsigned: true, precision: 10, scale: 2, default: 0.0 })
-  retail_price: number;
+  @Column({ type: "int", unsigned: true, default: 100 })
+  sort_order: number; // "排序权重"
 
-  // 成本
-  @Column({ type: "decimal", precision: 10, scale: 2, default: 0.0 })
-  cost: number;
-
-  // 商品重量（kg）
-  @Column({ type: "double", precision: 6, scale: 2, default: 0.0 })
-  goods_weight: number;
-
-  // 没用到可以删除了
-  @Column({ type: "tinyint", width: 1, default: 0 })
-  has_change: boolean;
-
-  // 商品名称
-  @Column({ type: "varchar", length: 120, default: null })
-  goods_name: boolean;
-
-  // 是否售卖中
-  @Column({ type: "tinyint", width: 1, default: 1 })
-  is_on_sale: boolean;
-
-  @Column({ type: "tinyint", width: 1, default: 0 })
-  is_delete: boolean;
+  @Column({ type: "tinyint", unsigned: true, width: 1, default: 0 })
+  is_delete: boolean; // '是否删除(1: 使用中、2: 已删除)'
 }
-
-export type IProductCreateMembers = TypeCreateMembers<
-  Product,
-  | "goods_id"
-  | "goods_number"
-  | "retail_price"
-  | "cost"
-  | "goods_weight"
-  | "has_change"
-  | "goods_name"
-  | "is_on_sale"
-  | "is_delete",
-  "id"
->;
-
-export type IProductUpdateMembers = TypeUpdateMembers<Product, "id">;

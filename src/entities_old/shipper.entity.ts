@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 //快递公司列表
+// 好像现在商家都是拿了这个去打印，这个放后面处理
 @Entity()
 export class Shipper {
   @PrimaryGeneratedColumn()

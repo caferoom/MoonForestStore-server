@@ -5,7 +5,7 @@ import {
   FreightTemplate,
   IFreightTemplateCreateMembers,
   IFreightTemplateUpdateMembers,
-} from "src/entities/freight_template.entity";
+} from "src/entities_old/freight_template.entity";
 import { Repository } from "typeorm";
 
 @Injectable()

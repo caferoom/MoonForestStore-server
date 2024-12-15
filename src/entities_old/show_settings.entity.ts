@@ -2,6 +2,8 @@ import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 // 一些功能配置开关表
+// 放后面处理
+
 @Entity()
 export class ShowSettings {
   @PrimaryGeneratedColumn({ type: "mediumint" })

@@ -4,7 +4,7 @@ import { AdController } from "./ad.controller";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Ad } from "src/entities/ad.entity";
-import { Goods } from "src/entities/goods.entity";
+import { Goods } from "src/entities_old/goods.entity";
 import { GoodsService } from "../../services/goods.service";
 
 @Module({

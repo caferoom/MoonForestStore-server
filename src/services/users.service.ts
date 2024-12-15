@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as dayjs from "dayjs";
-import { User } from "src/entities/user.entity";
+import { User } from "src/entities_old/user.entity";
 import { IStringOrNullValidator } from "src/modules/users/dto/user.dto";
 import { Repository } from "typeorm";
 import { isNil } from "lodash";

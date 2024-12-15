@@ -5,7 +5,7 @@ import {
   IGoodsSpecificationCreateMembers,
   IGoodsSpecificationUpdateMembers,
   GoodsSpecification,
-} from "src/entities/goods_specification.entity";
+} from "src/entities_old/goods_specification.entity";
 
 import { Repository } from "typeorm";
 

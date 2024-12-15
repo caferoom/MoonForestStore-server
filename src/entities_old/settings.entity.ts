@@ -1,7 +1,8 @@
 import { TypeCreateMembers, TypeUpdateMembers } from "src/common/helpers/types";
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-// 发件地址设置表
+// 商家发件地址设置表
+// 好像现在商家都是拿了这个去打印，这个放后面处理
 @Entity()
 export class Settings {
   @PrimaryGeneratedColumn({ type: "mediumint" })

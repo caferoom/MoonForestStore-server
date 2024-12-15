@@ -5,7 +5,7 @@ import {
   IOrderExpressCreateMembers,
   IOrderExpressUpdateMembers,
   OrderExpress,
-} from "src/entities/order_express.entity";
+} from "src/entities_old/order_express.entity";
 import { Repository } from "typeorm";
 
 @Injectable()
